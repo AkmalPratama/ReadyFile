@@ -10,7 +10,11 @@
   "scripts": {
     "test": "node --import tsx --test \"packages/*/test/**/*.test.ts\"",
     "test:watch": "node --import tsx --test --watch \"packages/*/test/**/*.test.ts\"",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "test:qa": "node --import tsx --test \"../03_qa/automated/**/*.test.ts\"",
+    "test:all": "npm run test && npm run test:qa",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:qa": "tsc --noEmit -p ../03_qa/tsconfig.json",
+    "verify": "npm run typecheck && npm run typecheck:qa && npm run test:all"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

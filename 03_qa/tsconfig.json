@@ -1,0 +1,10 @@
+{
+  "extends": "../02_source/tsconfig.base.json",
+  "compilerOptions": {
+    // 03_qa sits outside the npm workspace, so type resolution has to be pointed
+    // at the toolchain the project actually installs. Without typeRoots,
+    // `types: ["node"]` (inherited from the base config) cannot be found.
+    "typeRoots": ["../02_source/node_modules/@types"]
+  },
+  "include": ["automated/**/*.ts"]
+}
