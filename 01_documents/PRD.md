@@ -6,7 +6,7 @@
 
 | Item | Detail |
 | --- | --- |
-| Document version | 1.2 (Markdown edition) |
+| Document version | 1.3 (Markdown edition) |
 | Date | 16 November 2026 (v1.1) · converted and extended 20 November 2026 |
 | Source document | ReadyFile — Business Requirements Document v1.2 |
 | Product domain | Financial Services — Retail and SME Lending Operations |
@@ -405,7 +405,7 @@ Validation:
 
 | ID | Exception | Detected at | Required behaviour | Block | Message |
 | --- | --- | --- | --- | --- | --- |
-| E-19 | Officer enters a **wrong but plausible** date | Undetectable by the system | This is the MVP's principal accuracy risk. Mitigate by labelling each evaluated item with its provenance: *"issue date entered by officer at upload"* so the report never implies the date was read from the document | 🟡 | Provenance marker on every evaluated item |
+| E-19 | Officer enters a **wrong but plausible** date | Undetectable by the system | This is the MVP's principal accuracy risk. Mitigate by labelling each evaluated item with its provenance: *"document dates entered by officer at upload"* so the report never implies the date was read from the document. **v1.3 wording:** "dates", not "issue date" — a hard-expiry-only item (e.g. government photo ID) has no issue date, only the expiry date the officer typed, so the narrower wording would be false on exactly the rows where the marker matters most | 🟡 | Provenance marker on every evaluated item |
 | E-20 | Rule version saved without running a preview | Server | Permit, but record whether a preview was run in the audit log; show a confirmation dialog naming the count of seeded applications affected | 🟡 | "Save version 4? This affects future checks on all Personal Loan — Salaried files." |
 | E-21 | Historical check run cannot be replayed | Audit review | Every run must store rule version ID, expected decision date, engine version, and the evaluated document version IDs — sufficient for replay (TRD §7.4) | 🔴 (design constraint) | — |
 | E-22 | Concurrent check runs on the same application | Server | Both may execute; each is a separate immutable row. Latest by `run_at` governs status. No locking required for MVP | 🟢 | — |
@@ -841,3 +841,4 @@ This story demonstrates detection, forecasting, actionability, rework reduction,
 | --- | --- | --- | --- |
 | 1.1 | 2026-11-16 | Original draft for build planning | Hackathon Team |
 | 1.2 | 2026-11-20 | Markdown conversion. Added §5.3 handoff map (10 handoffs with gates and failure modes); §8.6 exception catalogue (24 exceptions); rewrote §17 as 49 measurable pass criteria with thresholds, methods and release gate; added §10.7 rule-based module scope separating configurable from fixed logic. Flagged the Encompass citation defect (OQ-6); corrected the §7.2 "measurable rework reduction" overclaim; added the decision-date honesty constraint (§7.1); promoted warning acknowledgment from stretch to Must ship; noted the missing AuditEvent entity; recorded evidence flag on the employment verification letter rule | Review pass |
+| 1.3 | 2026-11-20 | E-19 provenance marker reworded from *"issue date entered by officer at upload"* to *"document dates entered by officer at upload"*, found while implementing the engine (TRD v1.2 §15.1). A hard-expiry-only item has no issue date — only the expiry date the officer typed — so the narrower wording was false on exactly the rows where the marker exists to prevent over-trust. `DATE_PROVENANCE_OFFICER_ENTRY` in `@readyfile/core` is the single source of the string | Implementation pass |

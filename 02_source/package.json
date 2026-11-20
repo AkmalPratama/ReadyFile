@@ -1,0 +1,23 @@
+{
+  "name": "readyfile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ReadyFile \u2014 loan document completeness checker. Know at intake. Decide on time.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "node --import tsx --test \"packages/*/test/**/*.test.ts\"",
+    "test:watch": "node --import tsx --test --watch \"packages/*/test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

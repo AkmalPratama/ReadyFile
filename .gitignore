@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+*.tsbuildinfo
+
+# Build output
+dist/
+build/
+
+# Environment and secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Local demo database and uploaded files (TRD §14.1 SQLite + local disk driver)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+storage/
+
+# Test and coverage output
+coverage/
+.vitest/
+
+# Expo / React Native (TRD §6)
+.expo/
+expo-env.d.ts
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json

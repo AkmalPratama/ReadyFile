@@ -1,0 +1,13 @@
+{
+  "name": "@readyfile/rules-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic pure-function completeness engine. No I/O, no clocks, no randomness (TRD §7.3, TC-02). Depends only on @readyfile/core.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@readyfile/core": "*"
+  }
+}

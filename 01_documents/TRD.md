@@ -6,9 +6,9 @@
 
 | Item | Detail |
 | --- | --- |
-| Document version | 1.1 (Markdown edition) |
+| Document version | 1.2 (Markdown edition) |
 | Date | 16 November 2026 (v1.0) · converted and extended 20 November 2026 |
-| Source documents | ReadyFile BRD v1.2; ReadyFile PRD v1.2 |
+| Source documents | ReadyFile BRD v1.2; ReadyFile PRD v1.3 |
 | Scope | Web application, mobile companion app, backend API, rules engine |
 | Audience | Hackathon engineering team, technical mentors, judges |
 | Status | Draft for build |
@@ -179,7 +179,8 @@ readyfile/
 
 - Status rendering uses **text + color + icon** (NFR-09); never color alone.
 - Checklist table columns: document type, requirement level, uploaded count, evaluated issue date, status, reason, next action, rule ID.
-- 🆕 Each evaluated row shows the **date provenance marker** — "issue date entered by officer at upload" (PRD E-19 / PC-20). The report must never imply dates were read from the document.
+- 🆕 Each evaluated row shows the **date provenance marker** — "document dates entered by officer at upload" (PRD E-19 / PC-20). The report must never imply dates were read from the document.
+  - 🆕 v1.2 wording: **dates**, not "issue date". A hard-expiry-only rule (`freshness: null, hard_expiry: true` — e.g. `PS-ID-01`) has no issue date at all, only the expiry date the officer typed. Labeling that row "issue date entered by officer" would be false on exactly the rows where the marker matters most. `DATE_PROVENANCE_OFFICER_ENTRY` in `@readyfile/core` is the single source of this string.
 - "Run check" button shows a spinner and renders the report in place; target < 5 s, typical < 500 ms locally.
 - Readiness banner states: Incomplete (red), Complete with Warnings (amber, with **Acknowledge Warnings** action), Decision-Ready (green).
 - Fix pack panel lists Missing/Expired items with borrower-friendly guidance; "Include warnings" toggle; "Export CSV" action; "Copy as text" for pasting into email.
@@ -389,7 +390,7 @@ evaluate(input: {
 | --- | --- | --- |
 | `product_id` | string | Must reference an existing `products.id` |
 | `version` | integer | Must equal `max(existing version) + 1` for the product (else 409) |
-| `warning_horizon_days` | integer | ≥ 0, ≤ 90 |
+| `warning_horizon_days` | integer | ≥ 0, ≤ 90. Denoted `H`. **Semantics (🆕 v1.2, pinned by §15.1):** for a freshness rule with `max_age_days = M`, let `A` be the document's age in days at `expected_decision_date`. `A > M` ⇒ `EXPIRED`; `M − H ≤ A ≤ M` ⇒ `EXPIRING_SOON`; `A < M − H` ⇒ `PRESENT_VALID`. The warned range is therefore **H + 1 days wide, inclusive of both boundaries** — `H = 0` warns only at `A == M`, it does not disable warnings. Matches PRD §10.7 ("`age == max_age` ⇒ Expiring Soon, not Expired") |
 | `items[].rule_id` | string | Unique within the rule set; matches `^[A-Z]{2}-[A-Z]+-\d{2}$` |
 | `items[].document_type` | string | Must be in the known document-type enum — unknown types rejected (PC-25) |
 | `items[].requirement` | enum | `required \| conditional \| optional` |
@@ -500,7 +501,7 @@ Error codes: `VALIDATION_FAILED` (400) · `UNAUTHENTICATED` (401) · `FORBIDDEN`
       "reasonText": "Will be 32 days old on 2026-11-21; max allowed is 30 days.",
       "nextAction": "Upload a bank statement issued on or after 2026-10-22.",
       "evaluatedDocumentId": "doc_01J...",
-      "dateProvenance": "issue date entered by officer at upload"
+      "dateProvenance": "document dates entered by officer at upload"
     },
     {
       "ruleId": "PS-CBR-01",
@@ -759,13 +760,28 @@ Seeds are **idempotent** and resettable via `npm run seed:reset` (PC-47). Every 
 | Hard expiry boundary | `expiry_date` = decision | `EXPIRING_SOON` |
 | Conditional off | `tenure_months = 24` on EVL rule | `NOT_APPLICABLE`, excluded from score |
 | 🆕 Conditional attribute absent | `tenure_months` not in attributes | `NOT_APPLICABLE` + explicit reason naming the missing attribute (E-13) |
-| Version supersede | newer `issue_date` doc invalid, older valid | item `EXPIRED` (latest governs) |
+| Version supersede | newer `issue_date` doc invalid, older valid | item `EXPIRED` (latest governs). 🆕 **Only reachable on a hard-expiry basis** — under freshness a newer `issue_date` *is* the fresher document, so "newer but invalid" cannot occur. The real shape is a renewed ID whose expiry has already passed superseding an older still-valid one; the engine must not fall back to the superseded document. The complementary freshness case (a fresh upload superseding a stale one ⇒ `PRESENT_VALID`) is tested alongside it |
 | 🆕 Version tie-break | two docs, same `issue_date`, different `uploaded_at` | later `uploaded_at` evaluated |
 | Score with warning | 4 valid + 1 expiring of 5 required | score 100, `COMPLETE_WITH_WARNINGS` |
 | 🆕 Empty application | zero documents uploaded | all required `MISSING`, score 0, `INCOMPLETE` — no error (E-12) |
 | 🆕 Decision date in the past | `expected_decision_date` < today | runs normally; freshness items `EXPIRED` (E-18) |
 | 🆕 Unknown rule combination | rule with neither `freshness` nor `hard_expiry` | rejected by zod at save time, never reaches the engine (PC-25) |
 | Determinism | same input twice | identical output **including ordering** |
+
+| 🆕 Optional absent | `requirement: "optional"`, no document uploaded | `NOT_APPLICABLE` + reason `OPTIONAL_NOT_REQUIRED` — **not** `MISSING`. PRD §7.1 defines Missing as "*Required* document has no uploaded file", and §10.5 excludes optional items from scoring either way, so an absent optional document is out of scope, not a gap. An optional document that *is* uploaded is still evaluated normally, so a stale optional upload surfaces as a warning |
+| 🆕 Required date null | document present but `issue_date` null on a freshness rule, or `expiry_date` null on a hard-expiry rule | Fails **closed** to `EXPIRED` with `ISSUE_DATE_ABSENT` / `EXPIRY_DATE_ABSENT`. Upload validation (E-05/E-06) should prevent it; if it happens the item is unverifiable rather than passing (BRD BR-01) |
+| 🆕 Both bases configured | one rule with `freshness` **and** `hard_expiry`; freshness satisfied, expiry passed | `EXPIRED`, reason `HARD_EXPIRY_PASSED`. Both bases are evaluated and the most severe wins (§7.3 step 4) |
+| 🆕 Full document tie | two docs, same `issue_date`, same `uploaded_at`, same `version` | Greatest `id` evaluated. With the row above this makes selection a **total order**, so no input can produce an order-dependent result |
+| 🆕 Determinism under reordering | rules shuffled; documents shuffled | Byte-identical JSON. Stronger than "same input twice" — it catches an implementation that happens to preserve configuration or query order. Items are sorted by `rule_id` with code-unit comparison, explicitly not `localeCompare` (ICU collation varies by runtime locale) |
+
+> 🆕 **v1.2 — findings from implementing this matrix.** Both were caught by writing the tests, not by review, which is the argument for building the matrix before the service layer.
+>
+> 1. **"Optional absent" was unimplemented.** The engine returned `MISSING`. Nothing blocked — `aggregate` already excluded optional items from the gate — but the row read as a gap in both clients and in the fix pack, and `ReasonCode.OPTIONAL_NOT_REQUIRED` was declared in `@readyfile/core` yet produced nowhere in the codebase. Fixed; the case is now in the table above.
+> 2. **The warning boundary is easy to get wrong in the *other* direction.** `age >= M − H` is correct; `age > M − H` looks cleaner and silently moves the boundary to `M − H + 1`, breaking the "Warning boundary" row above and PRD §10.7. The formula is now written out in §8 and the test asserts all four boundaries (`M − H − 1`, `M − H`, `M`, `M + 1`) so either mistake fails loudly.
+>
+> **Not changed, deliberately:** a hard-expiry item warns only when `expiry_date` **equals** the decision date, not across the whole `warning_horizon_days` window. §7.4 and PRD §10.4 specify equality only, and widening it would flag IDs expiring weeks after approval, which no source in BRD §6.2 requires. Recorded so the asymmetry between the two bases reads as a decision rather than an oversight.
+>
+> **Client-side, not engine:** the E-18 banner ("Expected decision date … is in the past") is a presentation concern. The engine runs normally on a past decision date and returns the dates it used; WP4/WP6 render the banner.
 
 ### 15.2 Other test layers
 
@@ -856,3 +872,4 @@ Seeds are **idempotent** and resettable via `npm run seed:reset` (PC-47). Every 
 | --- | --- | --- | --- |
 | 1.0 | 2026-11-16 | Original draft for build | Hackathon Team |
 | 1.1 | 2026-11-20 | Markdown conversion. **Repaired:** replaced two expired-URL PNG diagrams with Mermaid (§3.1, §11); reconstructed invalid rule-config JSON and renamed `warning_horizontal_days` → `warning_horizon_days` (§8); normalised concatenated column names (§9); reconstructed the split check-response example (§10). **Added:** §7.7 module data-source and API map with six boundary rules; §5.4 and §6.4 web/mobile delivery plans with milestones, exit criteria and fallbacks; §12.1 four-role access control matrix with per-endpoint permissions and enforcement rules; §12.2 append-only `audit_events` spec with a 16-action taxonomy; TC-08/TC-09, AD-08/AD-09, SEC-04a/SEC-11; `*_by` actor columns and `demo_override` on documents; `dateProvenance` in the check response; six new engine unit cases; static-analysis CI gates; four new technical risks; WP1 expanded to carry authZ and audit middleware | Review pass |
+| 1.2 | 2026-11-20 | Reconciled with the implementation (`02_source/`). **§15.1:** added five rows the build surfaced — optional requirement level, null required date (fails closed), both bases on one rule, full document tie, determinism under input reordering — and clarified that *Version supersede* is only reachable on a hard-expiry basis. **§8:** wrote out the `warning_horizon_days` arithmetic (`A > M` ⇒ Expired; `M − H ≤ A ≤ M` ⇒ Expiring Soon) because the boundary is easy to implement one day off in either direction. **§5.2 / §10:** provenance marker reworded to "document dates entered by officer at upload" — a hard-expiry-only item has no issue date, so the narrower wording was false on exactly the rows where the marker matters (PRD E-19 updated to match). **Findings recorded:** `ReasonCode.OPTIONAL_NOT_REQUIRED` was declared but never produced, and an absent optional document rendered as a gap in both clients; both fixed in the engine | Implementation pass |
