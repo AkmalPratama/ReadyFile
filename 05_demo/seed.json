@@ -1,0 +1,1608 @@
+{
+  "meta": {
+    "seed_version": 1,
+    "engine_version": "0.1.0",
+    "processing_sla_days": 5,
+    "warning_horizon_days": 7,
+    "rule_source": "PRD §11 / BRD §6.2, transcribed in 03_qa/automated/fixtures.ts",
+    "generated_by": "05_demo/seed.ts",
+    "data_policy": "Synthetic demo data only (BRD NFR-03, TRD SEC-01). No real borrower information.",
+    "backend": "none — the delivery layer is a mockup; the engine runs in the browser from 05_demo/vendor"
+  },
+  "users": [
+    {
+      "role": "officer",
+      "email": "officer@demo.local",
+      "name": "Olivia Officer"
+    },
+    {
+      "role": "manager",
+      "email": "manager@demo.local",
+      "name": "Marcus Manager"
+    },
+    {
+      "role": "underwriter",
+      "email": "underwriter@demo.local",
+      "name": "Uma Underwriter"
+    },
+    {
+      "role": "auditor",
+      "email": "auditor@demo.local",
+      "name": "Ade Auditor"
+    }
+  ],
+  "permissions": {
+    "create_application": [
+      "officer",
+      "manager"
+    ],
+    "view_applications": [
+      "officer",
+      "manager",
+      "underwriter",
+      "auditor"
+    ],
+    "upload_document": [
+      "officer",
+      "manager"
+    ],
+    "download_document": [
+      "officer",
+      "manager",
+      "underwriter",
+      "auditor"
+    ],
+    "run_check": [
+      "officer",
+      "manager"
+    ],
+    "view_history": [
+      "officer",
+      "manager",
+      "underwriter",
+      "auditor"
+    ],
+    "ack_warnings": [
+      "officer",
+      "manager"
+    ],
+    "view_fix_pack": [
+      "officer",
+      "manager",
+      "underwriter"
+    ],
+    "export_fix_pack_csv": [
+      "officer",
+      "manager"
+    ],
+    "preview_rules": [
+      "officer",
+      "manager"
+    ],
+    "save_rules": [
+      "manager"
+    ],
+    "view_rules": [
+      "officer",
+      "manager",
+      "auditor"
+    ],
+    "view_audit": [
+      "manager",
+      "auditor"
+    ]
+  },
+  "products": [
+    {
+      "id": "personal_salaried",
+      "name": "Personal Loan — Salaried",
+      "rule_set": {
+        "product_id": "personal_salaried",
+        "version": 1,
+        "warning_horizon_days": 7,
+        "items": [
+          {
+            "rule_id": "PS-ID-01",
+            "document_type": "government_id",
+            "requirement": "required",
+            "condition": null,
+            "freshness": null,
+            "hard_expiry": true
+          },
+          {
+            "rule_id": "PS-ADR-01",
+            "document_type": "address_proof",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 90
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "PS-PSL-01",
+            "document_type": "payslips",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 60
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "PS-BANK-01",
+            "document_type": "bank_statement",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "PS-CBR-01",
+            "document_type": "credit_bureau_report",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "PS-EVL-01",
+            "document_type": "employment_verification_letter",
+            "requirement": "conditional",
+            "condition": {
+              "field": "tenure_months",
+              "op": "<",
+              "value": 12
+            },
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "personal_self_employed",
+      "name": "Personal Loan — Self-Employed",
+      "rule_set": {
+        "product_id": "personal_self_employed",
+        "version": 1,
+        "warning_horizon_days": 7,
+        "items": [
+          {
+            "rule_id": "SE-ID-01",
+            "document_type": "government_id",
+            "requirement": "required",
+            "condition": null,
+            "freshness": null,
+            "hard_expiry": true
+          },
+          {
+            "rule_id": "SE-ADR-01",
+            "document_type": "address_proof",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 90
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "SE-BANK-01",
+            "document_type": "bank_statement",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "SE-TAX-01",
+            "document_type": "tax_return",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 365
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "SE-BREG-01",
+            "document_type": "business_registration",
+            "requirement": "required",
+            "condition": null,
+            "freshness": null,
+            "hard_expiry": true
+          },
+          {
+            "rule_id": "SE-CBR-01",
+            "document_type": "credit_bureau_report",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "home_loan",
+      "name": "Home Loan",
+      "rule_set": {
+        "product_id": "home_loan",
+        "version": 1,
+        "warning_horizon_days": 7,
+        "items": [
+          {
+            "rule_id": "HL-ID-01",
+            "document_type": "government_id",
+            "requirement": "required",
+            "condition": null,
+            "freshness": null,
+            "hard_expiry": true
+          },
+          {
+            "rule_id": "HL-ADR-01",
+            "document_type": "address_proof",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 90
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-PSL-01",
+            "document_type": "payslips",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 60
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-BANK-01",
+            "document_type": "bank_statement",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-CBR-01",
+            "document_type": "credit_bureau_report",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-PVR-01",
+            "document_type": "property_valuation_report",
+            "requirement": "required",
+            "condition": null,
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 180
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-TAX-01",
+            "document_type": "tax_return",
+            "requirement": "conditional",
+            "condition": {
+              "field": "self_employed",
+              "op": "==",
+              "value": true
+            },
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 365
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-EVL-01",
+            "document_type": "employment_verification_letter",
+            "requirement": "conditional",
+            "condition": {
+              "field": "tenure_months",
+              "op": "<",
+              "value": 12
+            },
+            "freshness": {
+              "kind": "max_age",
+              "max_age_days": 30
+            },
+            "hard_expiry": false
+          },
+          {
+            "rule_id": "HL-INS-01",
+            "document_type": "insurance_certificate",
+            "requirement": "conditional",
+            "condition": {
+              "field": "security_type",
+              "op": "==",
+              "value": "property"
+            },
+            "freshness": null,
+            "hard_expiry": true
+          }
+        ]
+      }
+    }
+  ],
+  "applications": [
+    {
+      "id": "RF-2401",
+      "borrower": "Amara Okafor",
+      "product_id": "personal_salaried",
+      "loan_amount": 45000,
+      "submission_date": "2026-03-02",
+      "expected_decision_date": "2026-03-07",
+      "attributes": {
+        "employment_type": "salaried",
+        "self_employed": false,
+        "tenure_months": 36,
+        "loan_amount": 45000
+      },
+      "documents": [
+        {
+          "id": "2401-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2029-03-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2401-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-20",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2401-psl",
+          "documentType": "payslips",
+          "issueDate": "2026-02-23",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2401-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-02-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2401-1",
+          "label": "Intake check (PRD §16 step 3)",
+          "at": "2026-03-02T09:20:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2401-id",
+            "2401-adr",
+            "2401-psl",
+            "2401-bank"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-02T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "personal_salaried",
+            "submission_date": "2026-03-02",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-07"
+          }
+        },
+        {
+          "at": "2026-03-02T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2029-03-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-20",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "payslips",
+            "version": 1,
+            "issue_date": "2026-02-23",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-02-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:20:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-07"
+          }
+        }
+      ]
+    },
+    {
+      "id": "RF-2402",
+      "borrower": "Bruno Salgado",
+      "product_id": "personal_salaried",
+      "loan_amount": 30000,
+      "submission_date": "2026-03-02",
+      "expected_decision_date": "2026-03-07",
+      "attributes": {
+        "employment_type": "salaried",
+        "self_employed": false,
+        "tenure_months": 36,
+        "loan_amount": 30000
+      },
+      "documents": [
+        {
+          "id": "2402-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2029-03-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2402-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-20",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2402-psl",
+          "documentType": "payslips",
+          "issueDate": "2026-02-23",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2402-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-02-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2402-bank-v2",
+          "documentType": "bank_statement",
+          "issueDate": "2026-03-05",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T14:05:00.000Z",
+          "version": 2
+        },
+        {
+          "id": "2402-cbr",
+          "documentType": "credit_bureau_report",
+          "issueDate": "2026-03-05",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T14:06:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2402-1",
+          "label": "Recheck after replacements",
+          "at": "2026-03-02T14:10:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2402-id",
+            "2402-adr",
+            "2402-psl",
+            "2402-bank",
+            "2402-bank-v2",
+            "2402-cbr"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-02T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "personal_salaried",
+            "submission_date": "2026-03-02",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-07"
+          }
+        },
+        {
+          "at": "2026-03-02T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2029-03-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-20",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "payslips",
+            "version": 1,
+            "issue_date": "2026-02-23",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-02-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:14:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 2,
+            "issue_date": "2026-03-05",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:15:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "credit_bureau_report",
+            "version": 1,
+            "issue_date": "2026-03-05",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T14:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-07"
+          }
+        }
+      ]
+    },
+    {
+      "id": "RF-2403",
+      "borrower": "Chen Wei",
+      "product_id": "personal_self_employed",
+      "loan_amount": 60000,
+      "submission_date": "2026-03-01",
+      "expected_decision_date": "2026-03-06",
+      "attributes": {
+        "employment_type": "self_employed",
+        "self_employed": true,
+        "tenure_months": 48,
+        "loan_amount": 60000
+      },
+      "documents": [
+        {
+          "id": "2403-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2030-01-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2403-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-17",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2403-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-03-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2403-tax",
+          "documentType": "tax_return",
+          "issueDate": "2025-06-30",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2403-breg",
+          "documentType": "business_registration",
+          "issueDate": null,
+          "expiryDate": "2027-01-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2403-cbr",
+          "documentType": "credit_bureau_report",
+          "issueDate": "2026-03-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2403-1",
+          "label": "Intake check",
+          "at": "2026-03-01T09:20:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2403-id",
+            "2403-adr",
+            "2403-bank",
+            "2403-tax",
+            "2403-breg",
+            "2403-cbr"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-01T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "personal_self_employed",
+            "submission_date": "2026-03-01",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-06"
+          }
+        },
+        {
+          "at": "2026-03-01T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2030-01-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-01T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-17",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-01T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-03-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-01T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "tax_return",
+            "version": 1,
+            "issue_date": "2025-06-30",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-01T09:14:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "business_registration",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2027-01-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-01T09:15:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "credit_bureau_report",
+            "version": 1,
+            "issue_date": "2026-03-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-01T09:20:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-06"
+          }
+        }
+      ]
+    },
+    {
+      "id": "RF-2404",
+      "borrower": "Dana Haddad",
+      "product_id": "home_loan",
+      "loan_amount": 250000,
+      "submission_date": "2026-03-02",
+      "expected_decision_date": "2026-03-07",
+      "attributes": {
+        "employment_type": "self_employed",
+        "self_employed": true,
+        "tenure_months": 36,
+        "loan_amount": 250000,
+        "security_type": "property"
+      },
+      "documents": [
+        {
+          "id": "2404-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2028-05-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2404-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-15",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2404-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-03-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2404-cbr",
+          "documentType": "credit_bureau_report",
+          "issueDate": "2026-03-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2404-pvr",
+          "documentType": "property_valuation_report",
+          "issueDate": "2026-01-21",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2404-tax",
+          "documentType": "tax_return",
+          "issueDate": "2025-06-30",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2404-ins",
+          "documentType": "insurance_certificate",
+          "issueDate": null,
+          "expiryDate": "2027-03-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2404-1",
+          "label": "Intake check — payslips unobtainable (DEF-06)",
+          "at": "2026-03-02T09:20:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2404-id",
+            "2404-adr",
+            "2404-bank",
+            "2404-cbr",
+            "2404-pvr",
+            "2404-tax",
+            "2404-ins"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-02T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "home_loan",
+            "submission_date": "2026-03-02",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-07"
+          }
+        },
+        {
+          "at": "2026-03-02T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2028-05-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-15",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-03-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "credit_bureau_report",
+            "version": 1,
+            "issue_date": "2026-03-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:14:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "property_valuation_report",
+            "version": 1,
+            "issue_date": "2026-01-21",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:15:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "tax_return",
+            "version": 1,
+            "issue_date": "2025-06-30",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:16:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "insurance_certificate",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2027-03-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:20:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-07"
+          }
+        }
+      ]
+    },
+    {
+      "id": "RF-2405",
+      "borrower": "Elena Marsh",
+      "product_id": "home_loan",
+      "loan_amount": 320000,
+      "submission_date": "2026-03-02",
+      "expected_decision_date": "2026-03-07",
+      "attributes": {
+        "employment_type": "salaried",
+        "self_employed": false,
+        "tenure_months": 36,
+        "loan_amount": 320000,
+        "security_type": "property"
+      },
+      "documents": [
+        {
+          "id": "2405-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2028-05-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2405-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-15",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2405-psl",
+          "documentType": "payslips",
+          "issueDate": "2026-02-23",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2405-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-03-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2405-cbr",
+          "documentType": "credit_bureau_report",
+          "issueDate": "2026-03-03",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2405-pvr",
+          "documentType": "property_valuation_report",
+          "issueDate": "2026-01-21",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2405-ins",
+          "documentType": "insurance_certificate",
+          "issueDate": null,
+          "expiryDate": "2027-03-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2405-1",
+          "label": "Intake check",
+          "at": "2026-03-02T09:20:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2405-id",
+            "2405-adr",
+            "2405-psl",
+            "2405-bank",
+            "2405-cbr",
+            "2405-pvr",
+            "2405-ins"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-02T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "home_loan",
+            "submission_date": "2026-03-02",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-07"
+          }
+        },
+        {
+          "at": "2026-03-02T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2028-05-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-15",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "payslips",
+            "version": 1,
+            "issue_date": "2026-02-23",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-03-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:14:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "credit_bureau_report",
+            "version": 1,
+            "issue_date": "2026-03-03",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:15:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "property_valuation_report",
+            "version": 1,
+            "issue_date": "2026-01-21",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:16:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "insurance_certificate",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2027-03-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:20:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-07"
+          }
+        }
+      ]
+    },
+    {
+      "id": "RF-2406",
+      "borrower": "Farid Rahim",
+      "product_id": "personal_salaried",
+      "loan_amount": 20000,
+      "submission_date": "2026-03-02",
+      "expected_decision_date": "2026-03-07",
+      "attributes": {
+        "employment_type": "salaried",
+        "self_employed": false,
+        "tenure_months": 36,
+        "loan_amount": 20000
+      },
+      "documents": [
+        {
+          "id": "2406-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2029-03-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2406-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-20",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2406-psl",
+          "documentType": "payslips",
+          "issueDate": "2026-02-23",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2406-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-02-10",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2406-cbr",
+          "documentType": "credit_bureau_report",
+          "issueDate": "2026-03-05",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2406-1",
+          "label": "Intake check — statement inside the warning window",
+          "at": "2026-03-02T09:20:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2406-id",
+            "2406-adr",
+            "2406-psl",
+            "2406-bank",
+            "2406-cbr"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-02T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "personal_salaried",
+            "submission_date": "2026-03-02",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-07"
+          }
+        },
+        {
+          "at": "2026-03-02T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2029-03-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-20",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "payslips",
+            "version": 1,
+            "issue_date": "2026-02-23",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-02-10",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:14:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "credit_bureau_report",
+            "version": 1,
+            "issue_date": "2026-03-05",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:20:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-07"
+          }
+        }
+      ]
+    },
+    {
+      "id": "RF-2407",
+      "borrower": "Gita Novak",
+      "product_id": "personal_salaried",
+      "loan_amount": 15000,
+      "submission_date": "2026-03-02",
+      "expected_decision_date": "2026-03-07",
+      "attributes": {
+        "employment_type": "salaried",
+        "self_employed": false,
+        "tenure_months": 36,
+        "loan_amount": 15000
+      },
+      "documents": [
+        {
+          "id": "2407-id",
+          "documentType": "government_id",
+          "issueDate": null,
+          "expiryDate": "2029-03-01",
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2407-adr",
+          "documentType": "address_proof",
+          "issueDate": "2026-02-20",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2407-psl",
+          "documentType": "payslips",
+          "issueDate": "2026-02-23",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        },
+        {
+          "id": "2407-bank",
+          "documentType": "bank_statement",
+          "issueDate": "2026-04-01",
+          "expiryDate": null,
+          "uploadedAt": "2026-03-02T09:12:00.000Z",
+          "version": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-RF-2407-1",
+          "label": "Intake check — future-dated statement (DEF-07)",
+          "at": "2026-03-02T09:20:00.000Z",
+          "rule_version": 1,
+          "document_ids": [
+            "2407-id",
+            "2407-adr",
+            "2407-psl",
+            "2407-bank"
+          ],
+          "warnings_acknowledged": false
+        }
+      ],
+      "audit": [
+        {
+          "at": "2026-03-02T08:55:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "APPLICATION_CREATE",
+          "detail": {
+            "product_id": "personal_salaried",
+            "submission_date": "2026-03-02",
+            "processing_sla_days": 5,
+            "expected_decision_date": "2026-03-07"
+          }
+        },
+        {
+          "at": "2026-03-02T09:10:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "government_id",
+            "version": 1,
+            "issue_date": null,
+            "expiry_date": "2029-03-01",
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:11:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "address_proof",
+            "version": 1,
+            "issue_date": "2026-02-20",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:12:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "payslips",
+            "version": 1,
+            "issue_date": "2026-02-23",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:13:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "DOCUMENT_UPLOAD",
+          "detail": {
+            "document_type": "bank_statement",
+            "version": 1,
+            "issue_date": "2026-04-01",
+            "expiry_date": null,
+            "demo_override": false
+          }
+        },
+        {
+          "at": "2026-03-02T09:20:00.000Z",
+          "actor": "officer@demo.local",
+          "actor_role": "officer",
+          "event": "CHECK_RUN",
+          "detail": {
+            "rule_version_id": 1,
+            "engine_version": "0.1.0",
+            "expected_decision_date": "2026-03-07"
+          }
+        }
+      ]
+    }
+  ],
+  "demo_suggestions": {
+    "RF-2401": [
+      {
+        "id": "2401-bank-v2",
+        "documentType": "bank_statement",
+        "issueDate": "2026-03-05",
+        "expiryDate": null,
+        "uploadedAt": "2026-03-02T14:05:00.000Z",
+        "version": 2
+      },
+      {
+        "id": "2401-cbr",
+        "documentType": "credit_bureau_report",
+        "issueDate": "2026-03-05",
+        "expiryDate": null,
+        "uploadedAt": "2026-03-02T14:06:00.000Z",
+        "version": 1
+      }
+    ]
+  }
+}

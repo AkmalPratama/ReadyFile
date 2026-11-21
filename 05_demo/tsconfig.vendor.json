@@ -1,0 +1,16 @@
+{
+  "extends": "../02_source/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": false,
+    "rewriteRelativeImportExtensions": true,
+    "outDir": "./vendor",
+    "rootDir": "../02_source/packages",
+    "types": []
+  },
+  "include": [
+    "../02_source/packages/core/src/**/*.ts",
+    "../02_source/packages/rules-engine/src/**/*.ts"
+  ]
+}
