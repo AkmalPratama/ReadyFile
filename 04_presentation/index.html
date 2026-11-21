@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReadyFile — Know at intake. Decide on time.</title>
+<style>
+  :root{
+    --bg:#0B1220;
+    --card:#151F31;
+    --card-2:#111A29;
+    --border:#263449;
+    --text:#E8EDF5;
+    --muted:#93A4BD;
+    --faint:#5C6E88;
+    --teal:#35D0A5;
+    --amber:#F2A93B;
+    --slate:#3A4A63;
+    --font:"Helvetica Neue",Helvetica,"Segoe UI",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#05090F;font-family:var(--font);color:var(--text);overflow:hidden}
+
+  #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #stage{width:1280px;height:720px;position:relative;transform-origin:center center;flex:0 0 auto}
+
+  .slide{
+    position:absolute;inset:0;width:1280px;height:720px;
+    background:var(--bg);padding:56px 80px 64px;
+    display:none;flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  .slide.active{display:flex}
+
+  /* ---------- shared type ---------- */
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--teal);text-transform:uppercase}
+  .kicker.amber{color:var(--amber)}
+  h1{font-size:40px;line-height:1.15;font-weight:700;letter-spacing:-.01em;margin-top:14px}
+  h1 .thin{color:var(--muted);font-weight:400}
+  .lede{font-size:17px;line-height:1.5;color:var(--muted);margin-top:14px;max-width:1000px}
+  .body{flex:1;min-height:0;margin-top:26px}
+  .src{font-size:11.5px;color:var(--faint);margin-top:18px;line-height:1.45}
+  .src b{color:var(--muted);font-weight:600}
+
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:28px;height:100%}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;height:100%}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:20px;height:100%}
+  .grid2.dense{gap:16px}
+  .grid2.dense .panel{padding:16px 20px}
+  .grid2.dense .panel h2{font-size:13.5px;margin-bottom:11px}
+  .grid2.dense ul.check li{font-size:12.5px;line-height:1.4;margin-bottom:8px;padding-left:20px}
+  .grid2.dense ul.check li::before{top:6px;width:8px;height:8px}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px 26px;display:flex;flex-direction:column;min-height:0}
+  .panel h2{font-size:15px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:16px}
+  .panel h2.teal{color:var(--teal)}
+  .panel h2.amber{color:var(--amber)}
+  .panel h2.muted{color:var(--muted)}
+
+  ol.pain{list-style:none;counter-reset:p}
+  ol.pain li{counter-increment:p;position:relative;padding-left:34px;margin-bottom:14px;font-size:14.5px;line-height:1.45}
+  ol.pain li::before{
+    content:counter(p);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:6px;
+    background:var(--card-2);border:1px solid var(--border);color:var(--muted);
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  }
+  ol.pain li b{color:var(--text);font-weight:700}
+  ol.pain li span{color:var(--muted)}
+
+  ul.cost{list-style:none}
+  ul.cost li{font-size:14.5px;line-height:1.45;color:var(--muted);margin-bottom:15px;padding-left:20px;position:relative}
+  ul.cost li::before{content:"";position:absolute;left:0;top:8px;width:8px;height:8px;background:var(--amber);border-radius:2px}
+  ul.cost li b{color:var(--text)}
+
+  ul.check{list-style:none}
+  ul.check li{font-size:14px;line-height:1.42;color:var(--muted);margin-bottom:13px;padding-left:24px;position:relative}
+  ul.check li::before{content:"";position:absolute;left:0;top:7px;width:9px;height:9px;border-radius:50%;background:var(--teal)}
+  ul.check.amber li::before{background:var(--amber)}
+  ul.check li b{color:var(--text);font-weight:700}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;gap:20px;height:100%}
+  .kpis.n4{grid-template-columns:repeat(4,1fr)}
+  .kpis.n5{grid-template-columns:repeat(5,1fr)}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 22px 20px;display:flex;flex-direction:column}
+  .kpi .num{font-size:52px;font-weight:700;line-height:1;letter-spacing:-.02em;color:var(--teal);white-space:nowrap}
+  .kpi .num.amber{color:var(--amber)}
+  .kpi .num.white{color:var(--text)}
+  .kpi .num small{font-size:22px;font-weight:600;color:var(--muted);letter-spacing:0}
+  .kpi .lab{font-size:13.5px;font-weight:700;line-height:1.35;margin-top:14px;color:var(--text)}
+  .kpi .det{font-size:12.5px;line-height:1.45;color:var(--muted);margin-top:9px;flex:1}
+  .tier{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:5px;margin-top:12px;align-self:flex-start}
+  .tier.a{background:rgba(53,208,165,.14);color:var(--teal)}
+  .tier.b{background:rgba(242,169,59,.14);color:var(--amber)}
+  .tier.c{background:rgba(147,164,189,.14);color:var(--muted)}
+
+  /* ---------- hero ---------- */
+  .hero{display:grid;grid-template-columns:430px 1fr;gap:44px;height:100%;align-items:center}
+  .hero-nums{display:flex;align-items:flex-end;gap:14px}
+  .hero-nums .big{font-size:150px;font-weight:700;line-height:.85;letter-spacing:-.04em}
+  .hero-nums .big.ok{color:var(--teal)}
+  .hero-nums .big.bad{color:var(--amber)}
+  .hero-nums .gt{font-size:44px;font-weight:700;color:var(--faint);padding-bottom:22px}
+  .hero-cap{font-size:13px;color:var(--muted);margin-top:20px;line-height:1.5}
+  .hero-cap b{color:var(--text)}
+  .hero-body p{font-size:15.5px;line-height:1.55;color:var(--muted);margin-bottom:16px}
+  .hero-body p b{color:var(--text)}
+  .callout{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+  .callout b{color:var(--amber)}
+
+  /* ---------- architecture ---------- */
+  .arch{display:grid;grid-template-columns:1fr 470px;gap:44px;height:100%}
+  .arch-text p{font-size:14.5px;line-height:1.55;color:var(--muted);margin-bottom:18px}
+  .arch-text p b{color:var(--text);font-size:15.5px;display:block;margin-bottom:4px}
+  .stack{display:flex;flex-direction:column;justify-content:center;gap:0}
+  .node{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px}
+  .node .n{font-size:15px;font-weight:700;color:var(--text)}
+  .node .d{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+  .node .m{font-size:11.5px;color:var(--teal);font-weight:700;margin-top:8px;letter-spacing:.04em}
+  .arrow{height:26px;display:flex;align-items:center;justify-content:center;color:var(--slate);font-size:18px;line-height:1}
+  .arch-note{font-size:12px;color:var(--faint);line-height:1.5;margin-top:16px}
+
+  /* ---------- timeline ---------- */
+  .phases{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;height:100%}
+  .phase{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;display:flex;flex-direction:column;position:relative}
+  .phase .when{font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--teal);text-transform:uppercase}
+  .phase.next .when{color:var(--amber)}
+  .phase h3{font-size:20px;font-weight:700;margin-top:10px;line-height:1.2}
+  .phase p{font-size:13px;line-height:1.5;color:var(--muted);margin-top:12px;flex:1}
+  .phase .commit{font-size:11.5px;color:var(--faint);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:14px}
+  .phase .commit.done{color:var(--teal)}
+
+  /* ---------- bars ---------- */
+  .score{display:grid;grid-template-columns:1fr 430px;gap:40px;height:100%}
+  .barrow{margin-bottom:26px}
+  .barrow .bl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:9px}
+  .barrow .bl b{font-weight:700;color:var(--text)}
+  .barrow .bl span{color:var(--muted);font-size:12.5px}
+  .bar{height:26px;border-radius:6px;overflow:hidden;display:flex;background:var(--card-2)}
+  .bar i{display:block;height:100%}
+  .bar i.p{background:var(--teal)}
+  .bar i.a{background:var(--slate)}
+  .bar i.b{background:var(--amber)}
+  .legend{display:flex;gap:20px;font-size:12px;color:var(--muted);margin-top:6px}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:block}
+  .insight p{font-size:13.5px;line-height:1.5;color:var(--muted);margin-bottom:14px}
+  .insight p b{color:var(--text)}
+
+  /* ---------- defects ---------- */
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 9px;border-radius:5px;align-self:flex-start;margin-bottom:14px}
+  .badge.crit{background:var(--amber);color:#0B1220}
+  .badge.major{background:rgba(242,169,59,.18);color:var(--amber)}
+  .badge.minor{background:rgba(147,164,189,.16);color:var(--muted)}
+  .defect .id{font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px}
+  .defect .claim{font-size:13.5px;line-height:1.45;color:var(--text);font-weight:600;margin-bottom:12px}
+  .defect .facts{font-size:12.5px;line-height:1.5;color:var(--muted);flex:1}
+  .defect .facts code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--amber)}
+  .defect .why{font-size:12px;line-height:1.45;color:var(--faint);margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+
+  /* ---------- acts ---------- */
+  .act .step{display:flex;gap:12px;margin-bottom:11px;font-size:13px;line-height:1.42;color:var(--muted)}
+  .act .step .no{flex:0 0 22px;height:22px;border-radius:6px;background:var(--card-2);border:1px solid var(--border);color:var(--muted);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .act .step b{color:var(--text)}
+  .act .step.key .no{background:rgba(242,169,59,.18);border-color:var(--amber);color:var(--amber)}
+  .act .result{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.45}
+  .act .result b{color:var(--teal)}
+
+  /* ---------- cover ---------- */
+  .cover{justify-content:flex-start}
+  .cover .title{font-size:104px;font-weight:700;letter-spacing:-.035em;line-height:.95;margin-top:16px;color:#fff}
+  .cover .tag{font-size:31px;font-weight:700;color:var(--teal);margin-top:26px;letter-spacing:-.01em}
+  .cover .desc{font-size:16px;line-height:1.55;color:var(--muted);margin-top:20px;max-width:680px}
+  .tl{margin-top:auto;position:relative}
+  .tl-labels{position:relative;height:44px;margin-bottom:16px}
+  .tl-labels div{position:absolute;top:0;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+  .tl-labels .start{left:0}
+  .tl-labels .mid{left:60%;transform:translateX(-50%);text-align:center}
+  .tl-labels .end{left:100%;transform:translateX(-100%);text-align:right}
+  .tl-labels .sub{font-size:14.5px;font-weight:700;color:var(--text);letter-spacing:0;text-transform:none;margin-top:5px}
+  .tl-labels .amber{color:var(--amber)}
+  .tl-labels .teal{color:var(--teal)}
+  .tl-labels .mid{text-align:center}
+  .tl-labels .end{text-align:right}
+  .tl-track{height:2px;background:var(--border);position:relative}
+  .tl-track .dot{position:absolute;top:-7px;width:16px;height:16px;border-radius:50%;transform:translateX(-50%)}
+  .tl-track .dia{position:absolute;top:-12px;width:24px;height:24px;background:var(--amber);transform:translateX(-50%) rotate(45deg);border-radius:3px}
+  .tl-cap{font-size:14px;font-style:italic;color:var(--muted);margin-top:24px}
+  .meta{font-size:12px;color:var(--faint);margin-top:22px}
+
+  /* ---------- closing ---------- */
+  .closing{align-items:center;text-align:center;justify-content:center}
+  .closing .tag{font-size:56px;font-weight:700;color:var(--teal);letter-spacing:-.02em;line-height:1.1}
+  .closing .sub{font-size:17px;color:var(--muted);margin-top:20px}
+  .closing .next{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:44px;width:100%}
+  .closing .next .panel{text-align:left;padding:22px}
+  .closing .next h2{font-size:13px}
+  .closing .next p{font-size:13px;line-height:1.5;color:var(--muted)}
+  .closing .meta{margin-top:38px}
+
+  /* ---------- chrome ---------- */
+  #hud{position:fixed;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06);z-index:20}
+  #hud i{display:block;height:100%;background:var(--teal);width:0;transition:width .18s ease}
+  #counter{position:fixed;right:18px;bottom:16px;font-size:12px;color:var(--faint);z-index:20;font-variant-numeric:tabular-nums}
+  #hint{position:fixed;left:18px;bottom:16px;font-size:12px;color:var(--faint);z-index:20}
+  .navzone{position:fixed;top:0;bottom:0;width:12%;z-index:10;cursor:pointer}
+  .navzone.prev{left:0}
+  .navzone.next{right:0}
+
+  @media print{
+    html,body{overflow:visible;background:#fff;height:auto}
+    #viewport{position:static;display:block}
+    #stage{transform:none!important;width:1280px;height:auto}
+    .slide{display:flex!important;position:relative;page-break-after:always;break-after:page;
+           width:1280px;height:720px;border:none}
+    #hud,#counter,#hint,.navzone{display:none!important}
+    @page{size:1280px 720px;margin:0}
+  }
+</style>
+</head>
+<body>
+
+<div id="viewport"><div id="stage">
+
+<!-- 1 ─ COVER -->
+<section class="slide cover active">
+  <div class="kicker">Hackathon MVP · Retail &amp; SME lending operations</div>
+  <div class="title">ReadyFile</div>
+  <div class="tag">Know at intake. Decide on time.</div>
+  <div class="desc">A loan document completeness checker that tells an officer what is missing — and what will already have expired — before the file ever reaches underwriting.</div>
+  <div class="tl">
+    <div class="tl-labels">
+      <div class="start">Submitted<div class="sub">2 Mar 2026</div></div>
+      <div class="mid amber">Statement hits its 30-day limit<div class="sub" style="color:var(--muted);font-weight:400;font-size:13px">5 Mar · 27 days old at intake</div></div>
+      <div class="end teal">Decision due<div class="sub">7 Mar 2026</div></div>
+    </div>
+    <div class="tl-track">
+      <span class="dot" style="left:0%;background:var(--text)"></span>
+      <span class="dia" style="left:60%"></span>
+      <span class="dot" style="left:100%;background:var(--teal)"></span>
+    </div>
+    <div class="tl-cap">The entire product in one line: freshness is measured at the expected decision date, not at upload.</div>
+  </div>
+  <div class="meta">Akmal Pratama · 21 November 2026 · github.com/AkmalPratama/ReadyFile · BRD v1.2 / PRD v1.3 / TRD v1.2</div>
+</section>
+
+<!-- 2 ─ PROBLEM -->
+<section class="slide">
+  <div class="kicker amber">The problem</div>
+  <h1>Files do not fail for lack of effort. <span class="thin">They fail on timing.</span></h1>
+  <div class="body cols2">
+    <div class="panel">
+      <h2 class="muted">What happens today</h2>
+      <ol class="pain">
+        <li><b>Missing documents discovered late.</b> <span>Officers compare files against checklists held in spreadsheets or email templates. Omissions surface only when an underwriter picks the file up.</span></li>
+        <li><b>Expired documents slip through.</b> <span>A document valid at submission may expire before decision, forcing re-collection.</span></li>
+        <li><b>Rework loops delay processing.</b> <span>Each missing or expired item triggers a borrower request cycle averaging several days.</span></li>
+        <li><b>No single visibility of file readiness.</b> <span>No at-a-glance "decision-ready" status, so files queue that cannot progress.</span></li>
+        <li><b>Inconsistent checklist application.</b> <span>Different officers apply different standards; the audit trail of what was checked, and when, is weak.</span></li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h2 class="amber">What it costs</h2>
+      <ul class="cost">
+        <li><b>Longer time-to-decision and time-to-disbursement</b> — risking customer drop-off to competitors.</li>
+        <li><b>Higher operational cost per loan</b> from manual chasing and re-keying.</li>
+        <li><b>Compliance exposure</b> when stale KYC or income evidence is used in a decision.</li>
+        <li><b>Underwriter capacity wasted</b> on incomplete files.</li>
+      </ul>
+      <div class="callout" style="margin-top:auto">ReadyFile sits at one boundary — between intake and underwriting. That boundary <b>is</b> the product, not a feature of it.</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> BRD v1.2 §2.1 pain points P1–P5, §2.2 business impact · PRD v1.3 §5.3 handoff map H1–H10</div>
+</section>
+
+<!-- 3 ─ EVIDENCE -->
+<section class="slide">
+  <div class="kicker">Pain validation</div>
+  <h1>The pain is documented, not assumed</h1>
+  <div class="body" style="display:flex;flex-direction:column;gap:20px">
+    <div class="kpis n4" style="flex:1">
+      <div class="kpi">
+        <div class="num white">4–7<small> days</small></div>
+        <div class="lab">Document-collection delay per file</div>
+        <div class="det">The largest single delay contributor, ahead of spreading (1–2 days) and memo prep (3–5 hrs).</div>
+        <span class="tier c">TIER C · E8</span>
+      </div>
+      <div class="kpi">
+        <div class="num white">2–5<small> days</small></div>
+        <div class="lab">Lost per exception round-trip</div>
+        <div class="det">Every missing or stale document costs a full borrower request cycle.</div>
+        <span class="tier c">TIER C · E8</span>
+      </div>
+      <div class="kpi">
+        <div class="num amber">36<small>%</small></div>
+        <div class="lab">Borrowers re-supplying the same document</div>
+        <div class="det">Correlates with an 11-point NPS drop. A further 9% found requests unreasonable — a 70-point drop.</div>
+        <span class="tier b">TIER B · E6</span>
+      </div>
+      <div class="kpi">
+        <div class="num">30/60/90</div>
+        <div class="lab">Enforced document age limits, in days</div>
+        <div class="det">Bank and loan statements 30 · payslips 60 · ID and address bills ~90. Published lender credit policy.</div>
+        <span class="tier a">TIER A · E1 E2 E3</span>
+      </div>
+    </div>
+    <div class="panel" style="flex:0 0 auto;padding:18px 24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px">
+        <div style="font-size:12.5px;line-height:1.5;color:var(--muted)">
+          <b style="color:var(--text)">Confidence tiers.</b> <b style="color:var(--teal)">A</b> primary lender or regulator policy — high weight. <b style="color:var(--amber)">B</b> vendor-published data — medium, and self-interested. <b style="color:var(--muted)">C</b> trade press — framing only, never the sole support for a number.
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:var(--muted)">
+          <b style="color:var(--text)">Disclosed limit (OQ-B3).</b> ReadyFile has no access to a live lender pipeline. Every baseline above is an <b style="color:var(--amber)">external benchmark</b>. The MVP is accountable only for its own detection performance on synthetic seeded data.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> BRD v1.2 §2.3 evidence register E1 AMP Australia, E2 ANZ, E3 Macquarie, E6 Blend, E8 aloan.ai · §3.2 Register A · OQ-B3</div>
+</section>
+
+<!-- 4 ─ INSIGHT -->
+<section class="slide">
+  <div class="kicker">The differentiation</div>
+  <h1>Everyone measures age at upload. <span class="thin">We measure it at decision.</span></h1>
+  <div class="body hero">
+    <div>
+      <div class="hero-nums">
+        <span class="big ok">27</span>
+        <span class="gt">→</span>
+        <span class="big bad">32</span>
+      </div>
+      <div class="hero-cap">Days old. The rule limit is <b>30</b>.<br>Same document. Same file. Two verdicts.</div>
+      <div class="callout" style="margin-top:26px">PRD §16 calls step 4 <b>the money moment</b>: a statement valid <i>today</i> fails at the <i>decision date</i>. Rehearse the pause before revealing it — this single item is the entire differentiation argument.</div>
+    </div>
+    <div class="hero-body">
+      <p>A bank statement is <b>27 days old</b> when the officer uploads it. Under every published lender policy it is valid — they measure age at the submission date.</p>
+      <p>The application is Personal Loan — Salaried, submitted <b>2 Mar 2026</b>, with a <b>5-calendar-day</b> processing SLA. Expected decision date: <b>7 Mar 2026</b>.</p>
+      <p>At that date the same statement is <b>32 days old</b>, beyond the 30-day freshness rule. The engine returns <b>EXPIRED</b> — before the file moves, before the borrower is chased twice.</p>
+      <div class="callout"><b>Labelled honestly (BRD CE-2).</b> Published lender policy measures age at submission. ReadyFile is deliberately <b>stricter than observed market practice</b>. That is a product position, not a market standard, and the BRD says so. It catches documents that go stale mid-process — pain point P2 exactly.</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> BRD v1.2 §2.3 CE-2, refs E1 E2 · PRD v1.3 §10.1 expected decision date, §10.3 freshness, §16 step 4 · TRD v1.2 §14.2 <code>SLA_DEFAULT_DAYS=5</code></div>
+</section>
+
+<!-- 5 ─ WHAT WE BUILT -->
+<section class="slide">
+  <div class="kicker">What we built</div>
+  <h1>Three layers, in that order</h1>
+  <div class="body arch">
+    <div class="arch-text">
+      <p><b>Documents first</b>BRD v1.2, PRD v1.3 and TRD v1.2 written before any code. Every unevidenced claim traced to a named source with a confidence tier; every gap-fill marked 🆕 so a reviewer can tell what was added from what was given.</p>
+      <p><b>Then the engine</b>Two TypeScript packages. <b style="display:inline;font-size:inherit">@readyfile/core</b> holds the shared vocabulary, UTC integer-day date arithmetic, the SLA calculator and the zod rule-set schema. <b style="display:inline;font-size:inherit">@readyfile/rules-engine</b> holds the deterministic completeness evaluation.</p>
+      <p><b>Then independent QA</b>A 149-test acceptance suite in <b style="display:inline;font-size:inherit">03_qa</b> that sits <i>outside</i> the npm workspace and rebuilds the rule sets from the documents rather than importing the engine's own fixtures — so the two transcriptions can disagree.</p>
+      <div class="arch-note">That last decision already paid for itself: it surfaced DEF-06, a defect in the published Home Loan rule matrix that the single-product unit matrix could not see.</div>
+    </div>
+    <div class="stack">
+      <div class="node">
+        <div class="n">@readyfile/core</div>
+        <div class="d">Enums · document types · dates · SLA · zod rule schema</div>
+        <div class="m">6 files · 361 lines · depends only on zod</div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="node">
+        <div class="n">@readyfile/rules-engine</div>
+        <div class="d">Document selection · conditions · item evaluation · aggregation · borrower wording</div>
+        <div class="m">8 files · 785 lines · depends only on core</div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="node">
+        <div class="n">03_qa — acceptance suite</div>
+        <div class="d">Demo story · product matrix · golden wording · gate · determinism · schema gate · invalid metadata · decision date · EVL impact</div>
+        <div class="m">10 files · 2,988 lines · 149 tests</div>
+      </div>
+      <div class="arch-note">Unit matrix alongside: 1 file · 1,247 lines · 65 tests. Implementation total 15 files, 2,393 lines of TypeScript.</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> repository inventory at commit <code>de677b6</code> · TRD v1.2 §18 build order · 03_qa/test-plan.md §3</div>
+</section>
+
+<!-- 6 ─ HOW -->
+<section class="slide">
+  <div class="kicker">How we built it</div>
+  <h1>Spec → engine → independent verification</h1>
+  <div class="body phases">
+    <div class="phase">
+      <div class="when">20 Nov · Phase 1</div>
+      <h3>Requirements</h3>
+      <p>BRD, PRD and TRD written from the uploaded source documents. Pain validated against eleven named external sources with A/B/C tiers. Measurable pass criteria PC-01…PC-49 added to PRD §17. Access-control matrix and a sixteen-event audit taxonomy added to TRD §12.</p>
+      <div class="commit done">fd26d00</div>
+    </div>
+    <div class="phase">
+      <div class="when">20–21 Nov · Phase 2</div>
+      <h3>Engine</h3>
+      <p>Monorepo scaffolded on npm workspaces, then core, then rules-engine, in TRD §18 build order. Vitest evaluated and dropped after an npm arborist crash and a vulnerable vite/tinypool tree — replaced by the Node built-in runner. 65 unit tests covering all sixteen rows of the TRD §15.1 matrix.</p>
+      <div class="commit done">a3727e0</div>
+    </div>
+    <div class="phase">
+      <div class="when">21 Nov · Phase 3</div>
+      <h3>Independent QA</h3>
+      <p>03_qa created outside the workspace. Rule sets re-transcribed from PRD §11 rather than imported. 149 acceptance tests, 56 manual scenarios across three sets, a full traceability matrix and a QA report with a defect register.</p>
+      <div class="commit done">de677b6</div>
+    </div>
+    <div class="phase next">
+      <div class="when">Next · Phase 4</div>
+      <h3>Delivery</h3>
+      <p>WP1 remainder — Prisma schema, <code>audit_events</code>, seed script, Fastify skeleton, demo login, authZ and audit middleware. Then API, web, mobile, fix pack and deployment. All of WP3–WP8 is unbuilt.</p>
+      <div class="commit">not started</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> TRD v1.2 §18 build order · git log · 03_qa/test-plan.md §4 tooling, §8 unblocking map</div>
+</section>
+
+<!-- 7 ─ ENGINE LOGIC -->
+<section class="slide">
+  <div class="kicker">How it works</div>
+  <h1>How the engine decides</h1>
+  <div class="body grid2 dense">
+    <div class="panel">
+      <h2 class="muted">Item status — five states</h2>
+      <ul class="check" style="flex:1">
+        <li><b>PRESENT_VALID</b> — uploaded, fresh enough at the decision date</li>
+        <li><b>EXPIRING_SOON</b> — inside the warning window; still counts as valid</li>
+        <li><b>EXPIRED</b> — too old, or hard expiry passed; blocks the file</li>
+        <li><b>MISSING</b> — required item with no uploaded file; blocks the file</li>
+        <li><b>NOT_APPLICABLE</b> — condition not met, or optional and absent</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2 class="teal">Freshness, measured at the decision date</h2>
+      <p style="font-size:12.5px;line-height:1.5;color:var(--muted)">With <b style="color:var(--text)">M</b> the max age, <b style="color:var(--text)">H</b> the warning horizon and <b style="color:var(--text)">A</b> the document's age in days:</p>
+      <div style="margin-top:10px;font-size:13px;line-height:1.85;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace">
+        <div>A &gt; M &nbsp;→&nbsp; <span style="color:var(--amber)">EXPIRED</span></div>
+        <div>M−H ≤ A ≤ M &nbsp;→&nbsp; <span style="color:var(--amber)">EXPIRING_SOON</span></div>
+        <div>A &lt; M−H &nbsp;→&nbsp; <span style="color:var(--teal)">PRESENT_VALID</span></div>
+      </div>
+      <p style="font-size:11.5px;line-height:1.45;color:var(--faint);margin-top:auto">The warned range is H+1 days wide, inclusive of both ends. H = 0 warns only at exactly M — it does not disable warnings.</p>
+    </div>
+    <div class="panel">
+      <h2 class="amber">Hard expiry — equality only</h2>
+      <div style="font-size:13px;line-height:1.85;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace">
+        <div>expiry &lt; decision &nbsp;→&nbsp; <span style="color:var(--amber)">EXPIRED</span></div>
+        <div>expiry = decision &nbsp;→&nbsp; <span style="color:var(--amber)">EXPIRING_SOON</span></div>
+        <div>expiry &gt; decision &nbsp;→&nbsp; <span style="color:var(--teal)">PRESENT_VALID</span></div>
+      </div>
+      <p style="font-size:12.5px;line-height:1.45;color:var(--muted);margin-top:12px">No warning window on this basis — widening it would flag IDs expiring weeks after approval, which no source in BRD §6.2 requires.</p>
+      <p style="font-size:11.5px;line-height:1.45;color:var(--faint);margin-top:auto">Both bases can sit on one rule. Both are evaluated and the most severe wins.</p>
+    </div>
+    <div class="panel">
+      <h2 class="teal">Score and the gate</h2>
+      <div style="font-size:13px;line-height:1.45;color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:10px">score = round(valid required ÷ applicable required × 100)</div>
+      <ul class="check" style="flex:1">
+        <li>EXPIRING_SOON counts as <b>valid</b> for the score</li>
+        <li>Optional and NOT_APPLICABLE items are <b>excluded</b></li>
+        <li>Any required item MISSING or EXPIRED ⇒ <b>INCOMPLETE</b></li>
+        <li>Acknowledging warnings can <b>never</b> clear a blocker</li>
+      </ul>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> PRD v1.3 §10.3 freshness, §10.4 hard expiry, §10.5 score, §10.6 overall status, §10.7 · TRD v1.2 §7.3 steps 1–5, §8</div>
+</section>
+
+<!-- 8 ─ DETERMINISM -->
+<section class="slide">
+  <div class="kicker">Design decision</div>
+  <h1>Deterministic by construction</h1>
+  <div class="body cols2">
+    <div class="panel">
+      <h2 class="amber">What the engine cannot do</h2>
+      <ul class="check amber" style="flex:1">
+        <li><b>Read the wall clock.</b> No <code>Date.now</code> anywhere in <code>src</code>.</li>
+        <li><b>Use randomness.</b> No <code>Math.random</code>.</li>
+        <li><b>Touch the network, the filesystem or the environment.</b> No Node built-in imports at all.</li>
+        <li><b>Mutate the rule set it was handed</b> — so a sandbox preview can never rewrite history.</li>
+        <li><b>Depend on input ordering.</b> Items sort by rule id using code-unit comparison, explicitly <i>not</i> <code>localeCompare</code>, because ICU collation varies by runtime locale.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2 class="teal">What that buys</h2>
+      <ul class="check" style="flex:1">
+        <li><b>Same inputs + same rule version ⇒ byte-identical JSON.</b> PC-28 and NFR-02.</li>
+        <li><b>Any run is replayable</b> from its inputs plus its rule version. PC-30.</li>
+        <li><b>A rule change is data, not a deployment.</b> Edit-and-rerun measured at 0.015 ms against a two-minute budget. PC-27.</li>
+        <li><b>Three independent proofs</b> in QA: a static source scan with comments stripped, a behavioural spy that fails if <code>Date.now</code> or <code>Math.random</code> is called even once, and a dependency-manifest check.</li>
+        <li><b>Every result traces to a named policy line</b> — the answer to incumbents marketing against rules engines (BRD CE-1). We compete on explainability and auditability, not on minimising follow-ups.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> TRD v1.2 §7.3 determinism rules · BRD v1.2 §2.3 CE-1 (Blend, Tier B) · <code>03_qa/automated/replay-determinism.test.ts</code></div>
+</section>
+
+<!-- 9 ─ MEASURED -->
+<section class="slide">
+  <div class="kicker">Outcome</div>
+  <h1>Measured, not claimed</h1>
+  <div class="body" style="display:flex;flex-direction:column;gap:20px">
+    <div class="kpis n5" style="flex:1">
+      <div class="kpi">
+        <div class="num">214</div>
+        <div class="lab">Automated tests passing</div>
+        <div class="det">Zero failures across 70 suites — 65 engine unit tests, 149 acceptance tests.</div>
+      </div>
+      <div class="kpi">
+        <div class="num">0</div>
+        <div class="lab">TypeScript diagnostics</div>
+        <div class="det">Both projects, under <code>strict</code>, <code>noUncheckedIndexedAccess</code>, <code>exactOptionalPropertyTypes</code>, <code>erasableSyntaxOnly</code>.</div>
+      </div>
+      <div class="kpi">
+        <div class="num">0</div>
+        <div class="lab">Dependency vulnerabilities</div>
+        <div class="det"><code>npm audit</code>, full tree and production-only.</div>
+      </div>
+      <div class="kpi">
+        <div class="num" style="font-size:44px">0.013<small> ms</small></div>
+        <div class="lab">Median engine latency</div>
+        <div class="det">20 documents × 9 rules. p95 <b style="color:var(--text)">0.027 ms</b> against a PC-36 budget of 500 ms — ~18,000× inside.</div>
+      </div>
+      <div class="kpi">
+        <div class="num">0.9<small> s</small></div>
+        <div class="lab">Whole verify run</div>
+        <div class="det">Both typechecks plus both suites. Cheap enough to run on every change.</div>
+      </div>
+    </div>
+    <div class="panel" style="flex:0 0 auto;padding:18px 24px">
+      <div style="font-size:12.5px;line-height:1.55;color:var(--muted)">
+        <b style="color:var(--text)">Measurement conditions.</b> Node v23.11.0, npm 10.9.2, darwin arm64, commit <code>de677b6</code>. PC-36 figures are 50 sequential runs after 200 warm-ups; microsecond values jitter between runs, the order of magnitude does not.
+        <b style="color:var(--amber)">Two limits stated plainly:</b> no coverage tool is installed and there is no CI, so "214 passing" says nothing about untested branches (KL-08, KL-09). Latency here is <i>engine only</i> — HTTP, database reads and serialization do not exist.
+      </div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> <code>npm run verify</code>, <code>npm audit</code> · 03_qa/qa-report.md §2 · PRD v1.3 §17 PC-36</div>
+</section>
+
+<!-- 10 ─ SCORECARD -->
+<section class="slide">
+  <div class="kicker amber">Outcome</div>
+  <h1>The honest scorecard</h1>
+  <div class="body score">
+    <div>
+      <div class="barrow">
+        <div class="bl"><b>Release gate — PRD §17, PC-01…PC-47</b><span>8 pass · 12 partial · 27 blocked</span></div>
+        <div class="bar"><i class="p" style="width:17.0%"></i><i class="a" style="width:25.5%"></i><i class="b" style="width:57.5%"></i></div>
+      </div>
+      <div class="barrow">
+        <div class="bl"><b>Must-have requirements — PRD §9</b><span>7 done · 4 partial · 5 not started</span></div>
+        <div class="bar"><i class="p" style="width:43.75%"></i><i class="a" style="width:25%"></i><i class="b" style="width:31.25%"></i></div>
+      </div>
+      <div class="barrow">
+        <div class="bl"><b>Exceptions — PRD §8.6, E-01…E-24</b><span>2 verified · 11 partial · 11 blocked</span></div>
+        <div class="bar"><i class="p" style="width:8.3%"></i><i class="a" style="width:45.8%"></i><i class="b" style="width:45.9%"></i></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--teal)"></i>Pass / done</span>
+        <span><i style="background:var(--slate)"></i>Partial — engine layer only</span>
+        <span><i style="background:var(--amber)"></i>Blocked / not started</span>
+      </div>
+      <div class="callout" style="margin-top:26px">PRD §17 requires <b>"PC-01 … PC-47 all pass"</b> before the MVP ships. The release gate is <b>not met</b>, and cannot be met in the current state of the repository.</div>
+    </div>
+    <div class="insight">
+      <p><b>Why so low.</b> The API, database, seed data, web app, mobile app, authentication, audit log, upload path and fix-pack generator do not exist. Every criterion whose method is <b>I</b> (API integration), <b>E</b> (Playwright) or <b>M</b> (manual rehearsal) is <b>blocked, not passed</b>.</p>
+      <p><b>What is genuinely finished.</b> Every criterion whose method is U or G and whose subject is the engine or the rule schema passes. The only U-method exception is PC-16, CSV formula prefixing — a function that does not exist yet.</p>
+      <p><b>Manual scenarios.</b> 56 written across three sets — demo rehearsal, exceptions, role access. <b>None executed.</b></p>
+      <p><b>Cheapest unblocks.</b> PC-16, a pure function testable the moment the generator exists; and PC-31, no UPDATE or DELETE against immutable tables — a static grep once Prisma lands.</p>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> 03_qa/traceability.md, tallied row by row · 03_qa/qa-report.md §3 · the two verified exceptions are E-12 and E-13, the only two PRD assigns to the engine</div>
+</section>
+
+<!-- 11 ─ DEFECTS -->
+<section class="slide">
+  <div class="kicker amber">Outcome</div>
+  <h1>Three defects we published instead of hiding</h1>
+  <div class="body cols3">
+    <div class="panel defect">
+      <span class="badge crit">CRITICAL · OPEN</span>
+      <div class="id">DEF-07</div>
+      <div class="claim">A future-dated document defeats the decision-ready gate.</div>
+      <div class="facts">
+        Statement issued <code>2026-04-01</code> against a decision date of <code>2026-03-07</code> evaluates to <code>PRESENT_VALID</code>, reason code <code>VALID</code>, and tells the borrower it <i>"will be -25 days old"</i>.<br><br>
+        blockingCount 0 · warningCount 0 · score <b style="color:var(--amber)">100</b> · <b style="color:var(--amber)">DECISION_READY</b>. It also wins PRD §10.2 selection, displacing a genuine statement issued <code>2026-03-05</code>.
+      </div>
+      <div class="why">Reported, not patched: where to reject it — upload validation per E-07, an engine clamp, or both — is a specification decision. E-07's demo-override flag does not exist on <code>ItemResult</code> at all.</div>
+    </div>
+    <div class="panel defect">
+      <span class="badge major">MAJOR · OPEN</span>
+      <div class="id">DEF-06</div>
+      <div class="claim">A self-employed Home Loan applicant can never be Decision-Ready.</div>
+      <div class="facts">
+        PRD §11 marks <code>tax_return</code> Conditional on <code>self_employed</code> but <code>payslips</code> unconditionally Required — so exactly one income-evidence document is always unobtainable.<br><br>
+        Seven fresh valid documents uploaded: <code>HL-PSL-01</code> MISSING · score capped at <b style="color:var(--amber)">88</b> · INCOMPLETE forever.
+      </div>
+      <div class="why">The test demonstrates the fix as a <b style="color:var(--teal)">data change</b>: make HL-PSL-01 conditional on <code>self_employed == false</code> and the identical file returns NOT_APPLICABLE, score 100, DECISION_READY. Not applied — PRD §11 is the business owner's document.</div>
+    </div>
+    <div class="panel defect">
+      <span class="badge minor">MINOR · OPEN</span>
+      <div class="id">DEF-08</div>
+      <div class="claim">Two borrower-facing strings start lowercase.</div>
+      <div class="facts">
+        Ten of the eleven <code>reasonText</code> templates begin with a capital letter. The issue-date-absent and expiry-date-absent reasons begin with the lowercase document label:<br><br>
+        <i style="color:var(--muted)">"bank statement was uploaded but no issue date was recorded…"</i><br><br>
+        These strings reach the borrower through the fix pack, so casing is user-visible.
+      </div>
+      <div class="why">One-line fix, left open because changing user-facing copy during QA without a wording review would repeat the mistake DEF-05 was.</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> 03_qa/qa-report.md §5 · every open defect is reproduced by a <b>passing test that asserts the wrong behaviour</b>, so it fails loudly the moment someone fixes it correctly. Five further findings were closed during the build: DEF-01, DEF-02, DEF-04, DEF-05, and DEF-03 resolved as a spec ambiguity, not a defect.</div>
+</section>
+
+<!-- 12 ─ DEMO FLOW -->
+<section class="slide">
+  <div class="kicker">Demo flow</div>
+  <h1>Three acts, eleven steps</h1>
+  <div class="body cols3">
+    <div class="panel act">
+      <h2 class="amber">Act one — Detect</h2>
+      <div class="step"><span class="no">1</span><span>Officer opens a <b>Personal Loan — Salaried</b> application, decision date five days after submission.</span></div>
+      <div class="step"><span class="no">2</span><span>Uploads a government ID, an address proof, a payslip, and a bank statement issued <b>27 days ago</b>.</span></div>
+      <div class="step"><span class="no">3</span><span>The credit bureau report is <b>missing</b>.</span></div>
+      <div class="step key"><span class="no">4</span><span>Bank statement flagged <b>Expired</b> — it will be <b>32 days old</b> at the decision date, beyond the 30-day rule.</span></div>
+      <div class="step"><span class="no">5</span><span>Credit bureau report flagged <b>Missing</b>.</span></div>
+      <div class="step"><span class="no">6</span><span>Banner shows <b>Incomplete</b> and blocks decision-ready status.</span></div>
+      <div class="result">Measured: score <b>60</b> · blockingCount <b>2</b> · INCOMPLETE</div>
+    </div>
+    <div class="panel act">
+      <h2 class="teal">Act two — Fix</h2>
+      <div class="step"><span class="no">7</span><span>Officer clicks <b>Generate Borrower Fix Pack</b> and sees <b>one consolidated request list</b> instead of five separate chases. That is K4.</span></div>
+      <div class="step"><span class="no">8</span><span>Uploads a fresh bank statement and the credit bureau report.</span></div>
+      <div class="step"><span class="no">9</span><span>Reruns the check.</span></div>
+      <div class="step"><span class="no">10</span><span>File becomes <b>Decision-Ready</b>; the check-run timeline shows the improvement. That is K6, recheck conversion.</span></div>
+      <div class="result">Measured: score <b>100</b> · blockingCount <b>0</b> · DECISION_READY</div>
+    </div>
+    <div class="panel act">
+      <h2 class="muted">Act three — Configure</h2>
+      <div class="step"><span class="no">11</span><span>Officer opens the <b>policy sandbox</b>, changes bank statement max age from <b>30 to 45 days</b>, and previews the impact on seeded files.</span></div>
+      <div class="callout" style="margin-top:18px">The preview must <b>not rewrite history</b>. The engine never mutates the rule set it was handed, so the original stays byte-identical.</div>
+      <div class="result">Measured: score <b>60 → 80</b>, still INCOMPLETE · edit-and-rerun <b>0.015 ms</b> against a K5 budget of two minutes with <b>zero code changes</b></div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> PRD v1.3 §16 MVP demo story, steps 1–11 · BRD v1.2 §3.2 Register B K4 K5 K6 · numbers measured in <code>03_qa/automated/demo-story.test.ts</code> and <code>rule-config-gate.test.ts</code>. Rehearsal note from PRD: <b>step 4 is the money moment</b> — pause before revealing it.</div>
+</section>
+
+<!-- 13 ─ DEMO REALITY -->
+<section class="slide">
+  <div class="kicker amber">Demo flow</div>
+  <h1>What can actually be demoed today</h1>
+  <div class="body" style="display:flex;flex-direction:column;gap:20px">
+    <div class="cols2" style="flex:1">
+      <div class="panel">
+        <h2 class="teal">Demonstrable now — from a terminal</h2>
+        <ul class="check" style="flex:1">
+          <li><b>The evaluation itself.</b> Run against the seeded rule sets, it produces the real statuses, scores, reason codes and borrower-facing sentences for all eleven steps.</li>
+          <li><b>Steps 4 and 5 detection</b> — asserted with the exact numbers: 32 days, EXPIRED, MISSING, score 60, blockingCount 2, INCOMPLETE.</li>
+          <li><b>Step 9 recheck</b> — the same file re-evaluated after replacement documents returns score 100 and DECISION_READY.</li>
+          <li><b>Step 11 preview semantics</b> — the original rule set is provably unchanged; the edited one moves the score 60 → 80.</li>
+          <li><b>Audit-grade explanation for every item</b> — status, reason code, reason text, rule id and next action.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2 class="amber">Needs WP3 to WP5</h2>
+        <ul class="check amber" style="flex:1">
+          <li><b>Any browser walkthrough</b> — no React web app exists.</li>
+          <li><b>The Generate Borrower Fix Pack button</b> — generator and CSV export unbuilt.</li>
+          <li><b>The check-run timeline</b> — no database, therefore no stored history.</li>
+          <li><b>Login and role-restricted views</b> — only the <code>Role</code> constant exists; no authZ middleware.</li>
+          <li><b>The sandbox save path</b> — nothing persists a rule version.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel" style="flex:0 0 auto;padding:18px 24px">
+      <div style="font-size:14px;line-height:1.5;color:var(--muted)">
+        The demo can be told <b style="color:var(--teal)">truthfully today from a terminal</b>, and it <b style="color:var(--amber)">cannot be clicked through</b>. Presenting it as a working web app would be a claim the repository does not support.
+      </div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> 03_qa/scenarios/demo-rehearsal.md — all twelve scenarios marked blocked or partial, none executed · 03_qa/qa-report.md §4</div>
+</section>
+
+<!-- 14 ─ CLOSING -->
+<section class="slide closing">
+  <div class="tag">Know at intake.<br>Decide on time.</div>
+  <div class="sub">The brain works and is well tested. The body does not exist yet.</div>
+  <div class="next">
+    <div class="panel">
+      <h2 class="teal">Done</h2>
+      <p>A deterministic completeness engine, 214 passing tests, zero type errors, zero vulnerabilities — and a QA report that states its own limits rather than hiding them.</p>
+    </div>
+    <div class="panel">
+      <h2 class="muted">Next</h2>
+      <p>WP1 remainder: Prisma schema and <code>audit_events</code>, seed script, Fastify skeleton, demo login, authZ and audit middleware. Unblocks PC-31…PC-35, PC-46, PC-47 and all twenty access-control scenarios.</p>
+    </div>
+    <div class="panel">
+      <h2 class="amber">Needs a decision</h2>
+      <p><b>DEF-07</b> — where future-dated documents are rejected. <b>OQ-1</b> — which products are demoed. <b>OQ-7</b> — the employment verification letter window, 30 or 60 days, now priced at 4 of 6 sampled ages changing the file verdict.</p>
+    </div>
+  </div>
+  <div class="meta">Akmal Pratama · github.com/AkmalPratama/ReadyFile · 21 November 2026</div>
+</section>
+
+</div></div>
+
+<div class="navzone prev" title="Previous"></div>
+<div class="navzone next" title="Next"></div>
+<div id="hud"><i></i></div>
+<div id="hint">← → navigate · F fullscreen · P print to PDF</div>
+<div id="counter"></div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage = document.getElementById('stage');
+  var hud = document.querySelector('#hud i');
+  var counter = document.getElementById('counter');
+  var i = 0;
+
+  function fit(){
+    var s = Math.min(window.innerWidth/1280, window.innerHeight/720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach(function(el,k){ el.classList.toggle('active', k===i); });
+    hud.style.width = ((i+1)/slides.length*100) + '%';
+    counter.textContent = (i+1) + ' / ' + slides.length;
+    if (history.replaceState) history.replaceState(null,'','#'+(i+1));
+  }
+  function next(){ show(i+1); }
+  function prev(){ show(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    switch(e.key){
+      case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown': e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp': e.preventDefault(); prev(); break;
+      case 'Home': e.preventDefault(); show(0); break;
+      case 'End': e.preventDefault(); show(slides.length-1); break;
+      case 'f': case 'F':
+        if (document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen();
+        break;
+      case 'p': case 'P': e.preventDefault(); window.print(); break;
+    }
+  });
+  document.querySelector('.navzone.next').addEventListener('click', next);
+  document.querySelector('.navzone.prev').addEventListener('click', prev);
+  window.addEventListener('resize', fit);
+
+  var start = parseInt((location.hash||'').replace('#',''),10);
+  fit();
+  show(isNaN(start) ? 0 : start-1);
+})();
+</script>
+</body>
+</html>
