@@ -10,8 +10,10 @@ at the **expected decision date** (submission + the 5-calendar-day processing
 SLA), not at upload.
 
 Hackathon MVP. The rule engine, the specification set, an independent QA
-phase and a presentation deck are complete. The API, web app and mobile
-companion are **not built yet** — see [Status](#status) before demoing.
+phase, a presentation deck and a clickable delivery-layer mockup
+(`05_demo/`, real engine in the browser, no backend) are complete. The
+production API, web app and mobile companion are **not built yet** — see
+[Status](#status) before demoing.
 
 ## Status
 
@@ -20,8 +22,9 @@ companion are **not built yet** — see [Status](#status) before demoing.
 | Specifications (BRD v1.2, PRD v1.3, TRD v1.2) | Done — `01_documents/` |
 | Deterministic completeness engine | Done — 65 unit tests, all 16 rows of TRD §15.1 |
 | Independent QA | Done — 149 acceptance tests, 56 manual scenarios, traceability, report |
-| Presentation | Done — 14-slide deck + PDF, `04_presentation/` |
-| API, database, upload path, web app, mobile, fix pack, sandbox save | **Not built** (TRD §18 WP1 remainder, WP3–WP8) |
+| Presentation | Done — 18-slide deck + PDF, incl. demo-journey screenshots, `04_presentation/` |
+| Delivery-layer mockup | Done — `05_demo/`: every PRD §5 screen, real engine in-tab, synthetic seed, no backend |
+| API, database, upload path, production web app, mobile, fix pack, sandbox save | **Not built** (TRD §18 WP1 remainder, WP3–WP8) |
 | Release gate (PRD §17, PC-01…PC-47) | **Not met** — 8 pass · 12 partial · 27 blocked |
 | Open defects | DEF-07 (critical), DEF-06 (major), DEF-08 (minor) — `03_qa/qa-report.md` §5 |
 
@@ -38,7 +41,10 @@ stated in [`03_qa/qa-report.md`](03_qa/qa-report.md).
   packages/rules-engine/ pure deterministic evaluator (depends only on core)
 03_qa/            independent acceptance suite, manual scenarios, traceability
                   matrix, test plan and QA report (outside the npm workspace)
-04_presentation/  index.html deck, ReadyFile-deck.pdf, presenter README
+04_presentation/  index.html deck, ReadyFile-deck.pdf, journey screenshots,
+                  presenter README
+05_demo/          delivery-layer mockup: plain-ESM web app running the real
+                  engine in the browser, synthetic seed, sessionStorage only
 ```
 
 ## How the engine decides
@@ -87,8 +93,8 @@ All commands below run from `02_source/`:
 
 ### See a verdict in your terminal
 
-There is no web app to click through yet. The runnable product today is the
-engine, and the PRD §16 demo story runs against it directly. From `02_source/`:
+The engine runs standalone, and the PRD §16 demo story runs against it
+directly. From `02_source/`:
 
 ```bash
 node --import tsx --input-type=module -e '
@@ -118,10 +124,27 @@ is `03_qa/automated/demo-story.test.ts` (`npm run test:qa`).
 All demo data is synthetic (BRD NFR-03, TRD SEC-01). No real borrower data
 exists anywhere in this repository.
 
+### Click through the demo mockup
+
+`05_demo/` is a presentable web mockup of the full delivery layer — intake,
+pipeline, report, fix pack, history, audit trail and policy sandbox — running
+the **same engine** in the browser. No backend: state lives in
+`sessionStorage`, uploads capture metadata only, roles come from a picker.
+From the repo root:
+
+```bash
+bash 05_demo/serve.sh        # → http://localhost:8000/05_demo/
+```
+
+A local server is required because ES modules do not load from `file://`.
+Deep links (`?as=officer|manager|auditor`), the seeded journey and the
+real-vs-mocked boundary are documented in
+[`05_demo/README.md`](05_demo/README.md).
+
 ### Present the project
 
 Open [`04_presentation/index.html`](04_presentation/index.html) in a browser:
-arrow keys / space to navigate, `F` fullscreen, `P` to print a 14-page 16:9
+arrow keys / space to navigate, `F` fullscreen, `P` to print an 18-page 16:9
 PDF, `#N` to deep-link a slide. A ready-made export is
 [`04_presentation/ReadyFile-deck.pdf`](04_presentation/ReadyFile-deck.pdf).
 Controls, slide map and sourcing notes:
@@ -140,8 +163,10 @@ Details and reproduction commands: [`03_qa/qa-report.md`](03_qa/qa-report.md) §
 
 ## Known limitations and open decisions
 
-- **No delivery surface:** no API, database, upload path, web app, mobile app,
-  fix-pack generator or persisted sandbox. The demo is terminal-only.
+- **No production delivery surface:** no API, database, upload path,
+  production web app, mobile app, fix-pack generator or persisted sandbox.
+  The `05_demo` mockup previews these screens with the real engine in-tab,
+  but it is not the production build.
 - **DEF-07 (critical, open):** a future-dated document evaluates as valid and
   can displace a genuine one, defeating the decision-ready gate.
 - **DEF-06 (major, open):** a self-employed Home Loan applicant can never be
@@ -173,3 +198,4 @@ they fail loudly the moment someone fixes them correctly.
 - [`01_documents/TRD.md`](01_documents/TRD.md) — architecture, determinism, security, build order
 - [`03_qa/README.md`](03_qa/README.md) — how to run and read the QA phase
 - [`03_qa/qa-report.md`](03_qa/qa-report.md) — results, defects, limitations, decisions
+- [`05_demo/README.md`](05_demo/README.md) — mockup run steps, deep links, real-vs-mocked boundary

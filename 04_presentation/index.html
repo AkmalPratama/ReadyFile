@@ -46,10 +46,10 @@
   .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;height:100%}
   .grid2{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:20px;height:100%}
   .grid2.dense{gap:16px}
-  .grid2.dense .panel{padding:16px 20px}
-  .grid2.dense .panel h2{font-size:13.5px;margin-bottom:11px}
-  .grid2.dense ul.check li{font-size:12.5px;line-height:1.4;margin-bottom:8px;padding-left:20px}
-  .grid2.dense ul.check li::before{top:6px;width:8px;height:8px}
+  .grid2.dense .panel,.cols2.dense .panel{padding:16px 20px}
+  .grid2.dense .panel h2,.cols2.dense .panel h2{font-size:13.5px;margin-bottom:11px}
+  .grid2.dense ul.check li,.cols2.dense ul.check li{font-size:12.5px;line-height:1.4;margin-bottom:8px;padding-left:20px}
+  .grid2.dense ul.check li::before,.cols2.dense ul.check li::before{top:6px;width:8px;height:8px}
 
   .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px 26px;display:flex;flex-direction:column;min-height:0}
   .panel h2{font-size:15px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:16px}
@@ -165,6 +165,26 @@
   .act .step.key .no{background:rgba(242,169,59,.18);border-color:var(--amber);color:var(--amber)}
   .act .result{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.45}
   .act .result b{color:var(--teal)}
+
+  /* ---------- journey screenshots ---------- */
+  .journey{display:grid;grid-template-columns:1fr 360px;gap:26px;height:100%}
+  .journey.wide{grid-template-columns:1fr 394px}
+  .shotcol{display:flex;flex-direction:column;gap:10px;min-height:0}
+  .frame{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#F4F6FA;flex:0 0 auto}
+  .frame img{display:block;width:100%;height:auto}
+  .frame.clip{height:190px;position:relative}
+  .frame.clip img{position:absolute;bottom:0;left:0}
+  .shotcap{font-size:11.5px;color:var(--faint);line-height:1.45}
+  .shotcap b{color:var(--muted)}
+  .jpanel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;min-height:0}
+  .jpanel h2{font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px}
+  .jpanel h2.teal{color:var(--teal)} .jpanel h2.amber{color:var(--amber)} .jpanel h2.muted{color:var(--muted)}
+  .jpanel .step{display:flex;gap:10px;margin-bottom:9px;font-size:12.5px;line-height:1.4;color:var(--muted)}
+  .jpanel .step .no{flex:0 0 20px;height:20px;border-radius:6px;background:var(--card-2);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .jpanel .step b{color:var(--text)}
+  .jpanel .frame{margin-top:4px}
+  .jpanel .result{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.45}
+  .jpanel .result b{color:var(--teal)}
 
   /* ---------- cover ---------- */
   .cover{justify-content:flex-start}
@@ -403,8 +423,8 @@
     <div class="phase next">
       <div class="when">Next · Phase 4</div>
       <h3>Delivery</h3>
-      <p>WP1 remainder — Prisma schema, <code>audit_events</code>, seed script, Fastify skeleton, demo login, authZ and audit middleware. Then API, web, mobile, fix pack and deployment. All of WP3–WP8 is unbuilt.</p>
-      <div class="commit">not started</div>
+      <p>WP1 remainder — Prisma schema, <code>audit_events</code>, seed script, Fastify skeleton, demo login, authZ and audit middleware. Then API, web, mobile, fix pack and deployment. The <code>05_demo</code> mockup previews every §5 screen with the real engine in-tab; production WP3–WP8 is unbuilt.</p>
+      <div class="commit">mockup 562011b · WP3–WP8 not started</div>
     </div>
   </div>
   <div class="src"><b>Source:</b> TRD v1.2 §18 build order · git log · 03_qa/test-plan.md §4 tooling, §8 unblocking map</div>
@@ -557,7 +577,7 @@
     </div>
     <div class="insight">
       <p><b>Why so low.</b> The API, database, seed data, web app, mobile app, authentication, audit log, upload path and fix-pack generator do not exist. Every criterion whose method is <b>I</b> (API integration), <b>E</b> (Playwright) or <b>M</b> (manual rehearsal) is <b>blocked, not passed</b>.</p>
-      <p><b>What is genuinely finished.</b> Every criterion whose method is U or G and whose subject is the engine or the rule schema passes. The only U-method exception is PC-16, CSV formula prefixing — a function that does not exist yet.</p>
+      <p><b>What is genuinely finished.</b> Every criterion whose method is U or G and whose subject is the engine or the rule schema passes. The only U-method exception is PC-16, CSV formula prefixing — implemented today only inside the <code>05_demo</code> mockup, still without an acceptance test.</p>
       <p><b>Manual scenarios.</b> 56 written across three sets — demo rehearsal, exceptions, role access. <b>None executed.</b></p>
       <p><b>Cheapest unblocks.</b> PC-16, a pure function testable the moment the generator exists; and PC-31, no UPDATE or DELETE against immutable tables — a static grep once Prisma lands.</p>
     </div>
@@ -642,46 +662,130 @@
 <section class="slide">
   <div class="kicker amber">Demo flow</div>
   <h1>What can actually be demoed today</h1>
-  <div class="body" style="display:flex;flex-direction:column;gap:20px">
-    <div class="cols2" style="flex:1">
+  <div class="body" style="display:flex;flex-direction:column;gap:14px">
+    <div class="cols2 dense" style="flex:1">
       <div class="panel">
-        <h2 class="teal">Demonstrable now — from a terminal</h2>
+        <h2 class="teal">Demonstrable now — terminal and browser mockup</h2>
         <ul class="check" style="flex:1">
           <li><b>The evaluation itself.</b> Run against the seeded rule sets, it produces the real statuses, scores, reason codes and borrower-facing sentences for all eleven steps.</li>
           <li><b>Steps 4 and 5 detection</b> — asserted with the exact numbers: 32 days, EXPIRED, MISSING, score 60, blockingCount 2, INCOMPLETE.</li>
           <li><b>Step 9 recheck</b> — the same file re-evaluated after replacement documents returns score 100 and DECISION_READY.</li>
           <li><b>Step 11 preview semantics</b> — the original rule set is provably unchanged; the edited one moves the score 60 → 80.</li>
-          <li><b>Audit-grade explanation for every item</b> — status, reason code, reason text, rule id and next action.</li>
+          <li><b>The whole click-through</b> — <code>05_demo</code> runs the same engine in the browser: every §5 screen, role-gated actions, fix pack CSV, timeline and audit trail, on synthetic seed data.</li>
         </ul>
       </div>
       <div class="panel">
-        <h2 class="amber">Needs WP3 to WP5</h2>
+        <h2 class="amber">Still needs WP3 to WP7</h2>
         <ul class="check amber" style="flex:1">
-          <li><b>Any browser walkthrough</b> — no React web app exists.</li>
-          <li><b>The Generate Borrower Fix Pack button</b> — generator and CSV export unbuilt.</li>
-          <li><b>The check-run timeline</b> — no database, therefore no stored history.</li>
-          <li><b>Login and role-restricted views</b> — only the <code>Role</code> constant exists; no authZ middleware.</li>
-          <li><b>The sandbox save path</b> — nothing persists a rule version.</li>
+          <li><b>A production web app</b> — the mockup is plain ESM, not the React delivery layer.</li>
+          <li><b>Persistence</b> — no database: check runs, rule saves and uploads live in <code>sessionStorage</code> only.</li>
+          <li><b>Real auth and authZ middleware</b> — the mockup uses a role picker, not credentials.</li>
+          <li><b>File intake</b> — uploads capture metadata; no bytes, no storage, no OCR.</li>
+          <li><b>Durable audit</b> — append-only in session, not in <code>audit_events</code>.</li>
         </ul>
       </div>
     </div>
-    <div class="panel" style="flex:0 0 auto;padding:18px 24px">
-      <div style="font-size:14px;line-height:1.5;color:var(--muted)">
-        The demo can be told <b style="color:var(--teal)">truthfully today from a terminal</b>, and it <b style="color:var(--amber)">cannot be clicked through</b>. Presenting it as a working web app would be a claim the repository does not support.
+    <div class="panel" style="flex:0 0 auto;padding:14px 22px">
+      <div style="font-size:13px;line-height:1.5;color:var(--muted)">
+        The demo can be told <b style="color:var(--teal)">truthfully from a terminal and clicked through in the mockup</b>, with the real engine behind both. What does not exist yet is the <b style="color:var(--amber)">production backend</b> — presenting the mockup as one would be a claim the repository does not support.
       </div>
     </div>
   </div>
-  <div class="src"><b>Source:</b> 03_qa/scenarios/demo-rehearsal.md — all twelve scenarios marked blocked or partial, none executed · 03_qa/qa-report.md §4</div>
+  <div class="src"><b>Source:</b> 03_qa/scenarios/demo-rehearsal.md — production scenarios remain blocked or partial · 03_qa/qa-report.md §4 · 05_demo/README.md verification notes (flows exercised in-browser, nine screens screenshot-reviewed).</div>
 </section>
 
-<!-- 14 ─ CLOSING -->
+<!-- 14 ─ JOURNEY: DETECT -->
+<section class="slide">
+  <div class="kicker">Demo flow · live mockup</div>
+  <h1>Act one — the gate closes at the decision date</h1>
+  <div class="body journey">
+    <div class="shotcol">
+      <div class="frame"><img src="./img/journey-2-detect.png" alt="ReadyFile demo: RF-2401 report, score 60, bank statement Expired and credit bureau report Missing"></div>
+      <div class="shotcap"><b>Steps 4–6.</b> The bank statement will be <b>32 days old</b> on 2026-03-07 against a 30-day rule; the credit bureau report is missing. The banner closes the decision-ready gate. Screenshot: <code>05_demo</code>, officer session.</div>
+    </div>
+    <div class="jpanel">
+      <h2 class="teal">Steps 1–3 · Intake</h2>
+      <div class="step"><span class="no">1</span><span>Officer signs in through the role picker; decision date = submission + <b>5 calendar days</b>.</span></div>
+      <div class="step"><span class="no">2</span><span>Four documents uploaded; dates entered by the officer, never read from file bytes.</span></div>
+      <div class="step"><span class="no">3</span><span>Pipeline sorts <b>blocked files first</b> and tallies the gate live.</span></div>
+      <div class="frame"><img src="./img/journey-1-pipeline.png" alt="ReadyFile demo pipeline: 3 incomplete, 1 with warnings, 3 decision-ready, blocked files first"></div>
+      <div class="result">Measured in-tab: score <b>60</b> · blocking <b>2</b> · INCOMPLETE · tallies 3 / 1 / 3 / 0</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> screenshots captured from <code>05_demo/</code> running the real <code>@readyfile/rules-engine</code> in-browser · PRD v1.3 §16 steps 1–6 · same numbers asserted in <code>03_qa/automated/demo-story.test.ts</code>.</div>
+</section>
+
+<!-- 15 ─ JOURNEY: FIX -->
+<section class="slide">
+  <div class="kicker">Demo flow · live mockup</div>
+  <h1>Act two — one fix pack, one recheck, gate open</h1>
+  <div class="body journey">
+    <div class="shotcol">
+      <div class="frame"><img src="./img/journey-3-fixed.png" alt="ReadyFile demo: RF-2401 after replacement uploads, score 100, Decision-ready banner"></div>
+      <div class="shotcap"><b>Steps 8–10.</b> Bank statement v2 (issued 4 Mar) and credit bureau report v1 (issued 5 Mar) replace the blockers; every required item is valid at 7 Mar. The check-run selector keeps the intake run replayable.</div>
+    </div>
+    <div class="jpanel">
+      <h2 class="teal">Steps 7–10 · Fix</h2>
+      <div class="step"><span class="no">7</span><span><b>One consolidated fix pack</b> names the exact issue dates needed — not five separate chases. That is K4.</span></div>
+      <div class="step"><span class="no">8</span><span>Officer attaches the two replacement versions; metadata only, no file bytes leave the tab.</span></div>
+      <div class="step"><span class="no">9</span><span>Re-run check: the engine re-evaluates at the decision date, not at upload.</span></div>
+      <div class="step"><span class="no">10</span><span>Immutable timeline records both runs with rule version and document snapshot — K6.</span></div>
+      <div class="result">Measured in-tab: score <b>60 → 100</b> · blocking <b>0</b> · DECISION_READY · recheck <b>sub-millisecond</b> (0.1 ms in the audit row)</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> <code>05_demo/</code> officer session, captured after the replacement uploads · PRD v1.3 §16 steps 7–10 · CSV export carries the PC-16 formula-injection guard.</div>
+</section>
+
+<!-- 16 ─ JOURNEY: WARNINGS -->
+<section class="slide">
+  <div class="kicker">Demo flow · live mockup</div>
+  <h1>Warnings inform the decision. They never block it.</h1>
+  <div class="body journey">
+    <div class="shotcol">
+      <div class="frame"><img src="./img/journey-4-ack.png" alt="ReadyFile demo: RF-2406 after acknowledgement, Decision-ready banner with an Expiring soon row still visible"></div>
+      <div class="shotcap"><b>RF-2406.</b> The statement will be 25 days old at decision — inside the 7-day warning window, outside the 30-day limit. After the officer acknowledges, the file promotes to Decision-ready and the warning row stays visible.</div>
+    </div>
+    <div class="jpanel">
+      <h2 class="amber">The acknowledgement rule</h2>
+      <div class="step"><span class="no">▲</span><span>Warnings-only file + acknowledgement ⇒ <b>DECISION_READY</b>; the warning is recorded, not erased.</span></div>
+      <div class="step"><span class="no">■</span><span>Any MISSING or EXPIRED required item keeps the gate closed — <b>acknowledging cannot clear a blocker</b>, as the RF-2401 banner states.</span></div>
+      <div class="step"><span class="no">●</span><span>The action writes <code>WARNINGS_ACKNOWLEDGED</code> with the check-run id and warning count.</span></div>
+      <div class="result">Engine semantics: <code>aggregate.ts</code> · asserted in <code>03_qa</code> acceptance suite · visible here in the mockup banner</div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> <code>05_demo/</code> RF-2406 before/after acknowledgement · TRD §5.2 status behaviour · PRD v1.3 warning-horizon semantics (7 days).</div>
+</section>
+
+<!-- 17 ─ JOURNEY: POLICY + PROOF -->
+<section class="slide">
+  <div class="kicker">Demo flow · live mockup</div>
+  <h1>Act three — preview policy, then prove every action</h1>
+  <div class="body journey wide">
+    <div class="shotcol">
+      <div class="frame"><img src="./img/journey-5-sandbox.png" alt="ReadyFile demo rule sandbox: draft bank max age 20 days flips RF-2406 from Decision-ready to Incomplete, 1 of 4 files change"></div>
+      <div class="shotcap"><b>Manager sandbox.</b> Drafting bank max age 30 → 20 days flips the acknowledged file to Incomplete (100 → 80) — <b>1 of 4 files change</b>, side-by-side, before anything is saved.</div>
+      <div class="frame clip"><img src="./img/journey-6-audit.png" alt="ReadyFile demo audit trail: this session's uploads, checks and acknowledgement with actor, role and rule version"></div>
+      <div class="shotcap"><b>Auditor view, foot of RF-2401's trail.</b> This session's replacement uploads and the recheck — score 100, DECISION_READY, 0.1 ms in-browser — appended after the seeded events. The acknowledgement lands on RF-2406's trail.</div>
+    </div>
+    <div class="jpanel">
+      <h2 class="muted">Role-gated, append-only</h2>
+      <div class="step"><span class="no">1</span><span>Officers <b>preview</b> the sandbox; the save button is hidden, not disabled. Managers save a <b>new version</b> — v1 is never mutated.</span></div>
+      <div class="step"><span class="no">2</span><span>Underwriters and auditors see read-only views; navigation hides what the role cannot do (TRD §12.1).</span></div>
+      <div class="step"><span class="no">3</span><span>Saves and uploads live in <code>sessionStorage</code> only — <b>WP7 persistence is unbuilt</b>, and the mockup says so on screen.</span></div>
+      <div class="result">Capability matrix and the 16 audit event names come verbatim from TRD §12 · mockup badge: <b>MOCKUP · NO BACKEND</b></div>
+    </div>
+  </div>
+  <div class="src"><b>Source:</b> <code>05_demo/</code> manager sandbox preview (unsaved) and auditor trail · TRD §7.6 versioning, §12.1–12.2 · PC-21…PC-27 preview-before-save.</div>
+</section>
+
+<!-- 18 ─ CLOSING -->
 <section class="slide closing">
   <div class="tag">Know at intake.<br>Decide on time.</div>
-  <div class="sub">The brain works and is well tested. The body does not exist yet.</div>
+  <div class="sub">The brain is tested. The body is a mockup — the production build is next.</div>
   <div class="next">
     <div class="panel">
       <h2 class="teal">Done</h2>
-      <p>A deterministic completeness engine, 214 passing tests, zero type errors, zero vulnerabilities — and a QA report that states its own limits rather than hiding them.</p>
+      <p>A deterministic completeness engine, 214 passing tests, zero type errors, zero vulnerabilities — plus a delivery-layer mockup that runs the same engine in the browser, and a QA report that states its own limits rather than hiding them.</p>
     </div>
     <div class="panel">
       <h2 class="muted">Next</h2>

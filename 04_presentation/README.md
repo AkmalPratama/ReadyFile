@@ -1,14 +1,17 @@
 # 04_presentation — ReadyFile hackathon deck
 
-A 14-slide presentation of what was built, how it was built, what the outcome
-actually is, and how the demo runs. Self-contained: one HTML file, no build
-step, no dependencies, no network access. A PDF export of the same deck is
-included for sharing and for venues without a browser.
+An 18-slide presentation of what was built, how it was built, what the outcome
+actually is, and how the demo runs — including four slides of real screenshots
+from the `05_demo` mockup walking the full user journey. Self-contained: one
+HTML file plus local images, no build step, no dependencies, no network
+access. A PDF export of the same deck is included for sharing and for venues
+without a browser.
 
 | File | What it is |
 | --- | --- |
 | `index.html` | The deck. Open it in any browser. |
-| `ReadyFile-deck.pdf` | 14-page 16:9 export of `index.html`, generated with headless Chrome print. |
+| `ReadyFile-deck.pdf` | 18-page 16:9 export of `index.html`, generated with headless Chrome print. |
+| `img/journey-*.png` | Six 2× screenshots captured from a clean `05_demo` officer → manager → auditor session. |
 
 ## Presenting
 
@@ -21,7 +24,7 @@ Open `index.html` (double-click, or `open 04_presentation/index.html`).
 | `Home` / `End` | First / last slide |
 | Click left / right edge | Previous / next slide |
 | `F` | Toggle fullscreen |
-| `P` | Print dialog → save as PDF (14 pages, 16:9, no margins) |
+| `P` | Print dialog → save as PDF (18 pages, 16:9, no margins) |
 | `#N` in the URL | Deep-link to slide N, e.g. `index.html#10` |
 
 The stage is a fixed 1280×720 canvas scaled to fit the window, so layout is
@@ -32,7 +35,7 @@ To regenerate the PDF exactly as shipped:
 
 ```bash
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-  --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=2000 \
+  --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=15000 \
   --print-to-pdf=04_presentation/ReadyFile-deck.pdf \
   "file://$PWD/04_presentation/index.html"
 ```
@@ -53,11 +56,16 @@ To regenerate the PDF exactly as shipped:
 | 10 | The honest scorecard — 47 gates, 16 Must-haves, 24 exceptions | Outcome, honestly |
 | 11 | Three defects we published instead of hiding — DEF-07 / DEF-06 / DEF-08 | Outcome, defects |
 | 12 | Three acts, eleven steps — the demo story with measured numbers | Demo flow |
-| 13 | What can actually be demoed today — terminal vs needs WP3–WP5 | Demo flow, truthfully |
-| 14 | Closing — done / next / needs a decision | Where to go from here |
+| 13 | What can actually be demoed today — terminal + mockup vs needs WP3–WP7 | Demo flow, truthfully |
+| 14 | Act one — the gate closes at the decision date (screenshot: RF-2401 score 60, INCOMPLETE) | Demo journey, detect |
+| 15 | Act two — one fix pack, one recheck, gate open (screenshot: score 100, DECISION_READY) | Demo journey, fix |
+| 16 | Warnings inform the decision. They never block it. (screenshot: RF-2406 acknowledgement) | Demo journey, warnings |
+| 17 | Act three — preview policy, then prove every action (screenshots: rule sandbox + audit trail) | Demo journey, govern |
+| 18 | Closing — done / next / needs a decision | Where to go from here |
 
 Suggested talk track: 1–4 problem and insight (3 min), 5–8 what and how
-(3 min), 9–11 outcome (3 min), 12–13 demo (3 min), 14 ask (1 min).
+(3 min), 9–11 outcome (3 min), 12–17 demo story then the screenshot journey
+(4 min), 18 ask (1 min).
 
 ## Where every number comes from
 
@@ -72,15 +80,20 @@ underlying artefacts are:
 - `03_qa/qa-report.md` — measured results §2, coverage §3, defect register
   §5, known limitations §6, open decisions §7.
 - `03_qa/traceability.md` — the 47-gate tally, counted row by row.
-- `git log` — commits `fd26d00`, `a3727e0`, `de677b6`.
+- `git log` — commits `fd26d00`, `a3727e0`, `de677b6`, `562011b` (mockup).
+- `05_demo/README.md` — verification notes behind the journey screenshots
+  on slides 14–17; the numbers there were measured in-tab, not estimated.
 - Latency and re-run figures were measured on this machine (Node v23.11.0,
   darwin arm64) at commit `de677b6`; slide 9 states the conditions and the
   two limits (no coverage tool, no CI) next to the numbers.
 
 ## What the deck deliberately does not claim
 
-- No working web or mobile app. Slide 13 says the demo **cannot be clicked
-  through**; it is a terminal demonstration of the engine.
+- No production web or mobile app. Slides 13–17 are honest about the split:
+  the `05_demo` mockup **can be clicked through** with the real engine
+  in-tab, but it is plain ESM with `sessionStorage`, a role picker instead
+  of auth, metadata-only uploads and no durable backend. Presenting it as
+  the production app would be a claim the repository does not support.
 - The release gate is **not met**: 8 of 47 criteria pass, 12 partial, 27
   blocked. Blocked is shown as blocked, never as passed.
 - The 56 manual scenarios are written, **none executed**.
@@ -92,7 +105,16 @@ underlying artefacts are:
 
 ## Verification performed
 
-All 14 slides were rendered at 1280×720 with headless Chrome and inspected
+All 18 slides were rendered at 1280×720 with headless Chrome and inspected
 visually; layout defects found in that pass (phase-card grid collision,
-engine-logic panel overflow, KPI unit wrap) were fixed and re-rendered. The
-PDF export was checked to contain exactly 14 pages at 960×540 pt (16:9).
+engine-logic panel overflow, KPI unit wrap, slide-13 callout overlap) were
+fixed and re-rendered. The PDF export was checked to contain exactly 18
+pages at 960×540 pt (16:9).
+
+The six journey screenshots were captured from a clean seeded `05_demo`
+session driven end-to-end over the Chrome DevTools Protocol: officer login →
+pipeline → RF-2401 detection (score 60, INCOMPLETE) → two replacement
+uploads → recheck (score 100, DECISION_READY, 0.1 ms) → RF-2406 warning
+acknowledgement → manager rule preview (30 → 20 days, 1 of 4 files change,
+unsaved) → auditor trail. The session's audit events were dumped and checked
+against what the slides claim before the images were placed.
