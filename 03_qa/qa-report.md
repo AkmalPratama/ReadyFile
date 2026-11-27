@@ -1,7 +1,7 @@
 # ReadyFile QA report
 
 **Version:** 1.0 · **Date:** 2026-11-21 · **Author:** QA (automated)
-**Build under test:** commit `a3727e0` *"Implement the deterministic completeness engine and reconcile the specs"*, plus the uncommitted `03_qa/` suite and the `01_documents/TRD.md` citation fixes.
+**Build under test:** commit `947e003` *"Implement the deterministic completeness engine and reconcile the specs"*, plus the uncommitted `03_qa/` suite and the `01_documents/TRD.md` citation fixes.
 **Governing documents:** BRD v1.2, PRD v1.3, TRD v1.2
 
 > Every number in this report was produced by a command run on the date above and

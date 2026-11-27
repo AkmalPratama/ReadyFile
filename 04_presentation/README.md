@@ -80,11 +80,11 @@ underlying artefacts are:
 - `03_qa/qa-report.md` — measured results §2, coverage §3, defect register
   §5, known limitations §6, open decisions §7.
 - `03_qa/traceability.md` — the 47-gate tally, counted row by row.
-- `git log` — commits `fd26d00`, `a3727e0`, `de677b6`, `562011b` (mockup).
+- `git log` — commits `f0d8124`, `947e003`, `48a31aa`, `ffc3b0e` (mockup).
 - `05_demo/README.md` — verification notes behind the journey screenshots
   on slides 14–17; the numbers there were measured in-tab, not estimated.
 - Latency and re-run figures were measured on this machine (Node v23.11.0,
-  darwin arm64) at commit `de677b6`; slide 9 states the conditions and the
+  darwin arm64) at commit `48a31aa`; slide 9 states the conditions and the
   two limits (no coverage tool, no CI) next to the numbers.
 
 ## What the deck deliberately does not claim

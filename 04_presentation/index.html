@@ -394,7 +394,7 @@
       <div class="arch-note">Unit matrix alongside: 1 file · 1,247 lines · 65 tests. Implementation total 15 files, 2,393 lines of TypeScript.</div>
     </div>
   </div>
-  <div class="src"><b>Source:</b> repository inventory at commit <code>de677b6</code> · TRD v1.2 §18 build order · 03_qa/test-plan.md §3</div>
+  <div class="src"><b>Source:</b> repository inventory at commit <code>48a31aa</code> · TRD v1.2 §18 build order · 03_qa/test-plan.md §3</div>
 </section>
 
 <!-- 6 ─ HOW -->
@@ -406,25 +406,25 @@
       <div class="when">20 Nov · Phase 1</div>
       <h3>Requirements</h3>
       <p>BRD, PRD and TRD written from the uploaded source documents. Pain validated against eleven named external sources with A/B/C tiers. Measurable pass criteria PC-01…PC-49 added to PRD §17. Access-control matrix and a sixteen-event audit taxonomy added to TRD §12.</p>
-      <div class="commit done">fd26d00</div>
+      <div class="commit done">f0d8124</div>
     </div>
     <div class="phase">
       <div class="when">20–21 Nov · Phase 2</div>
       <h3>Engine</h3>
       <p>Monorepo scaffolded on npm workspaces, then core, then rules-engine, in TRD §18 build order. Vitest evaluated and dropped after an npm arborist crash and a vulnerable vite/tinypool tree — replaced by the Node built-in runner. 65 unit tests covering all sixteen rows of the TRD §15.1 matrix.</p>
-      <div class="commit done">a3727e0</div>
+      <div class="commit done">947e003</div>
     </div>
     <div class="phase">
       <div class="when">21 Nov · Phase 3</div>
       <h3>Independent QA</h3>
       <p>03_qa created outside the workspace. Rule sets re-transcribed from PRD §11 rather than imported. 149 acceptance tests, 56 manual scenarios across three sets, a full traceability matrix and a QA report with a defect register.</p>
-      <div class="commit done">de677b6</div>
+      <div class="commit done">48a31aa</div>
     </div>
     <div class="phase next">
       <div class="when">Next · Phase 4</div>
       <h3>Delivery</h3>
       <p>WP1 remainder — Prisma schema, <code>audit_events</code>, seed script, Fastify skeleton, demo login, authZ and audit middleware. Then API, web, mobile, fix pack and deployment. The <code>05_demo</code> mockup previews every §5 screen with the real engine in-tab; production WP3–WP8 is unbuilt.</p>
-      <div class="commit">mockup 562011b · WP3–WP8 not started</div>
+      <div class="commit">mockup ffc3b0e · WP3–WP8 not started</div>
     </div>
   </div>
   <div class="src"><b>Source:</b> TRD v1.2 §18 build order · git log · 03_qa/test-plan.md §4 tooling, §8 unblocking map</div>
@@ -542,7 +542,7 @@
     </div>
     <div class="panel" style="flex:0 0 auto;padding:18px 24px">
       <div style="font-size:12.5px;line-height:1.55;color:var(--muted)">
-        <b style="color:var(--text)">Measurement conditions.</b> Node v23.11.0, npm 10.9.2, darwin arm64, commit <code>de677b6</code>. PC-36 figures are 50 sequential runs after 200 warm-ups; microsecond values jitter between runs, the order of magnitude does not.
+        <b style="color:var(--text)">Measurement conditions.</b> Node v23.11.0, npm 10.9.2, darwin arm64, commit <code>48a31aa</code>. PC-36 figures are 50 sequential runs after 200 warm-ups; microsecond values jitter between runs, the order of magnitude does not.
         <b style="color:var(--amber)">Two limits stated plainly:</b> no coverage tool is installed and there is no CI, so "214 passing" says nothing about untested branches (KL-08, KL-09). Latency here is <i>engine only</i> — HTTP, database reads and serialization do not exist.
       </div>
     </div>
